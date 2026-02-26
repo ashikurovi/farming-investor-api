@@ -23,8 +23,6 @@ const forgot_password_dto_1 = require("./dto/forgot-password.dto");
 const reset_password_dto_1 = require("./dto/reset-password.dto");
 const jwt_1 = require("@nestjs/jwt");
 let UsersController = class UsersController {
-    usersService;
-    jwtService;
     constructor(usersService, jwtService) {
         this.usersService = usersService;
         this.jwtService = jwtService;

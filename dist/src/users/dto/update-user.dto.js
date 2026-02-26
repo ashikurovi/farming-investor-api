@@ -13,13 +13,6 @@ exports.UpdateUserDto = void 0;
 const class_validator_1 = require("class-validator");
 const user_entity_1 = require("../entities/user.entity");
 class UpdateUserDto {
-    name;
-    phone;
-    email;
-    password;
-    location;
-    role;
-    photoUrl;
 }
 exports.UpdateUserDto = UpdateUserDto;
 __decorate([

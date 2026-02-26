@@ -17,15 +17,6 @@ var UserRole;
     UserRole["INVESTOR"] = "investor";
 })(UserRole || (exports.UserRole = UserRole = {}));
 let UserEntity = class UserEntity {
-    id;
-    name;
-    phone;
-    email;
-    password;
-    location;
-    photoUrl;
-    role;
-    isBanned;
 };
 exports.UserEntity = UserEntity;
 __decorate([

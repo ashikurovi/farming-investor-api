@@ -12,8 +12,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.LoginUserDto = void 0;
 const class_validator_1 = require("class-validator");
 class LoginUserDto {
-    email;
-    password;
 }
 exports.LoginUserDto = LoginUserDto;
 __decorate([
