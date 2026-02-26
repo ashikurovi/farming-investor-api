@@ -59,7 +59,7 @@ if (!process.env.VERCEL) {
 }
 
 // --- VERCEL ENTRY POINT ---
-export default async function handler(req: IncomingMessage, res: ServerResponse) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Get the cached application instance
     const app = await bootstrap();
 
