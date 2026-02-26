@@ -22,7 +22,7 @@ import { LoginUserDto } from './dto/login-user.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { JwtService } from '@nestjs/jwt';
-import type { Express, Request } from 'express';
+import { Request } from 'express';
 
 @Controller('users')
 export class UsersController {
@@ -35,7 +35,7 @@ export class UsersController {
   @UseInterceptors(FileInterceptor('photo'))
   async create(
     @Req() req: Request,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file: any,
     @Body() createUserDto: CreateUserDto,
   ) {
     if (file) {
@@ -140,7 +140,7 @@ export class UsersController {
   async update(
     @Param('id') id: number,
     @Req() req: Request,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file: any,
     @Body() updateUserDto: UpdateUserDto,
   ) {
     if (file) {
