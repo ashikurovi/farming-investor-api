@@ -1,2 +1,2 @@
-import type { IncomingMessage, ServerResponse } from 'http';
-export default function handler(req: IncomingMessage, res: ServerResponse): Promise<void>;
+import type { VercelRequest, VercelResponse } from './vercel-types';
+export default function handler(req: VercelRequest, res: VercelResponse): Promise<void>;

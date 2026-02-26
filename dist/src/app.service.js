@@ -12,6 +12,13 @@ let AppService = class AppService {
     getHello() {
         return 'Hello World!';
     }
+    getHealth() {
+        return {
+            status: 'OK',
+            message: 'Server is running',
+            timestamp: new Date().toISOString(),
+        };
+    }
 };
 exports.AppService = AppService;
 exports.AppService = AppService = __decorate([
