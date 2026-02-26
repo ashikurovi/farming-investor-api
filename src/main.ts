@@ -5,6 +5,8 @@ import { AppModule } from './app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import type { IncomingMessage, ServerResponse } from 'http';
 import { join } from 'path';
+import { ValidationPipe } from '@nestjs/common';
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 
 
 
@@ -24,8 +26,15 @@ async function bootstrap(): Promise<NestExpressApplication> {
   credentials: false, // optional: cookie/credential নেই
 });
 
+        app.useGlobalPipes(
+          new ValidationPipe({
+            whitelist: true,
+            forbidNonWhitelisted: true,
+            transform: true,
+          }),
+        );
 
-
+        app.useGlobalFilters(new AllExceptionsFilter());
         // 3. Initialize the app to finalize middleware and routing
         await app.init();
      

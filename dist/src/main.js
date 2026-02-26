@@ -4,6 +4,8 @@ exports.default = handler;
 const core_1 = require("@nestjs/core");
 const app_module_1 = require("./app.module");
 const path_1 = require("path");
+const common_1 = require("@nestjs/common");
+const all_exceptions_filter_1 = require("./common/filters/all-exceptions.filter");
 let cachedApp;
 async function bootstrap() {
     if (!cachedApp) {
@@ -14,6 +16,12 @@ async function bootstrap() {
             origin: true,
             credentials: false,
         });
+        app.useGlobalPipes(new common_1.ValidationPipe({
+            whitelist: true,
+            forbidNonWhitelisted: true,
+            transform: true,
+        }));
+        app.useGlobalFilters(new all_exceptions_filter_1.AllExceptionsFilter());
         await app.init();
         app.useStaticAssets((0, path_1.join)(process.cwd(), 'uploads'), { prefix: '/uploads/' });
         cachedApp = app;
