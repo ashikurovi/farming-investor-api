@@ -5,10 +5,12 @@ import { MulterModule } from '@nestjs/platform-express';
 @Module({
   imports: [
     MulterModule.register({
-      dest: './uploads',
+      dest:
+        process.env.NODE_ENV === 'production'
+          ? '/tmp'
+          : './uploads',
     }),
   ],
   exports: [MulterModule],
 })
 export class UploadsModule {}
-
