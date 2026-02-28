@@ -18,7 +18,7 @@ export class BlobStorageService {
         {
           access: 'public',
           addRandomSuffix: true,
-          token: 'vercel_blob_rw_g8izUGtr3LSr8CFX_orMyKCSnAc3VEDfLKjFTzQ4cIOXlSi',
+          token: 'vercel_blob_rw_UWXMYKXOXviIXovH_uPqlndwmUlLFGBHzTUofVwks4i2yN5',
         },
       );
 
