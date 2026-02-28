@@ -55,6 +55,10 @@ __decorate([
     (0, typeorm_1.Column)({ default: false }),
     __metadata("design:type", Boolean)
 ], UserEntity.prototype, "isBanned", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)('InvestmentEntity', 'user'),
+    __metadata("design:type", Array)
+], UserEntity.prototype, "investments", void 0);
 exports.UserEntity = UserEntity = __decorate([
     (0, typeorm_1.Entity)('tbl_users'),
     (0, typeorm_1.Index)(['role']),

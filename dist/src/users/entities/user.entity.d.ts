@@ -12,4 +12,5 @@ export declare class UserEntity {
     photoUrl?: string;
     role: UserRole;
     isBanned: boolean;
+    investments: any[];
 }

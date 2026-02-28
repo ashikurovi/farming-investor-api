@@ -15,6 +15,10 @@ const typeorm_1 = require("@nestjs/typeorm");
 const users_module_1 = require("./users/users.module");
 const uploads_module_1 = require("./uploads/uploads.module");
 const banner_module_1 = require("./banner/banner.module");
+const project_period_module_1 = require("./project-period/project-period.module");
+const auth_module_1 = require("./auth/auth.module");
+const projects_module_1 = require("./projects/projects.module");
+const investments_module_1 = require("./investments/investments.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -26,20 +30,26 @@ exports.AppModule = AppModule = __decorate([
             }),
             typeorm_1.TypeOrmModule.forRootAsync({
                 inject: [config_1.ConfigService],
-                useFactory: (configService) => ({
-                    type: 'postgres',
-                    url: process.env.DATABASE_URL,
-                    autoLoadEntities: true,
-                    synchronize: true,
-                    logging: true,
-                    ssl: {
-                        rejectUnauthorized: false,
-                    },
-                }),
+                useFactory: (configService) => {
+                    return {
+                        type: 'postgres',
+                        url: process.env.DATABASE_URL,
+                        autoLoadEntities: true,
+                        synchronize: true,
+                        logging: true,
+                        ssl: {
+                            rejectUnauthorized: false,
+                        },
+                    };
+                },
             }),
+            auth_module_1.AuthModule,
             users_module_1.UsersModule,
             uploads_module_1.UploadsModule,
             banner_module_1.BannerModule,
+            project_period_module_1.ProjectPeriodModule,
+            projects_module_1.ProjectsModule,
+            investments_module_1.InvestmentsModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

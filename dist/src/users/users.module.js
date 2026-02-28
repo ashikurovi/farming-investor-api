@@ -9,7 +9,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsersModule = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
-const jwt_1 = require("@nestjs/jwt");
 const users_service_1 = require("./users.service");
 const users_controller_1 = require("./users.controller");
 const user_entity_1 = require("./entities/user.entity");
@@ -18,15 +17,10 @@ let UsersModule = class UsersModule {
 exports.UsersModule = UsersModule;
 exports.UsersModule = UsersModule = __decorate([
     (0, common_1.Module)({
-        imports: [
-            typeorm_1.TypeOrmModule.forFeature([user_entity_1.UserEntity]),
-            jwt_1.JwtModule.register({
-                secret: process.env.JWT_SECRET || 'dev-secret',
-                signOptions: { expiresIn: '7d' },
-            }),
-        ],
+        imports: [typeorm_1.TypeOrmModule.forFeature([user_entity_1.UserEntity])],
         controllers: [users_controller_1.UsersController],
         providers: [users_service_1.UsersService],
+        exports: [users_service_1.UsersService, typeorm_1.TypeOrmModule],
     })
 ], UsersModule);
 //# sourceMappingURL=users.module.js.map

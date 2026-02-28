@@ -7,6 +7,8 @@ import type { VercelRequest, VercelResponse } from './vercel-types';
 import { join } from 'path';
 import { ValidationPipe } from '@nestjs/common';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+import compression from 'compression';
 
 
 
@@ -35,6 +37,7 @@ async function bootstrap(): Promise<NestExpressApplication> {
         );
 
         app.useGlobalFilters(new AllExceptionsFilter());
+        app.use(compression()); // gzip responses for faster transfer
         // 3. Initialize the app to finalize middleware and routing
         await app.init();
      

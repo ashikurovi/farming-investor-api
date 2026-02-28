@@ -1,4 +1,4 @@
-import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 export enum UserRole {
   ADMIN = 'admin',
@@ -35,4 +35,7 @@ export class UserEntity {
 
   @Column({ default: false })
   isBanned: boolean;
+
+  @OneToMany('InvestmentEntity', 'user')
+  investments: any[];
 }
