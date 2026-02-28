@@ -10,6 +10,7 @@ import { ProjectPeriodModule } from './project-period/project-period.module';
 import { AuthModule } from './auth/auth.module';
 import { ProjectsModule } from './projects/projects.module';
 import { InvestmentsModule } from './investments/investments.module';
+import { GlarryModule } from './glarry/glarry.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { InvestmentsModule } from './investments/investments.module';
     ProjectPeriodModule,
     ProjectsModule,
     InvestmentsModule,
+    GlarryModule,
   ],
 
   controllers: [AppController],

@@ -23,6 +23,9 @@ let BlobStorageService = BlobStorageService_1 = class BlobStorageService {
     async uploadProjectImage(file) {
         return this.upload(file, 'uploads/projects');
     }
+    async uploadGlarryPhoto(file) {
+        return this.upload(file, 'uploads/glarry');
+    }
     async upload(file, prefix) {
         if (!file || !file.buffer) {
             throw new common_1.InternalServerErrorException('No file buffer provided for upload');

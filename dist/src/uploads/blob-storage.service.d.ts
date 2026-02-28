@@ -4,5 +4,6 @@ export declare class BlobStorageService {
     uploadUserPhoto(file: Express.Multer.File): Promise<string>;
     uploadBannerPhoto(file: Express.Multer.File): Promise<string>;
     uploadProjectImage(file: Express.Multer.File): Promise<string>;
+    uploadGlarryPhoto(file: Express.Multer.File): Promise<string>;
     private upload;
 }

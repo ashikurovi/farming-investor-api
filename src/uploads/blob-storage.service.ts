@@ -18,6 +18,10 @@ export class BlobStorageService {
     return this.upload(file, 'uploads/projects');
   }
 
+  async uploadGlarryPhoto(file: Express.Multer.File): Promise<string> {
+    return this.upload(file, 'uploads/glarry');
+  }
+
   private async upload(file: Express.Multer.File, prefix: string): Promise<string> {
     if (!file || !file.buffer) {
       throw new InternalServerErrorException('No file buffer provided for upload');
