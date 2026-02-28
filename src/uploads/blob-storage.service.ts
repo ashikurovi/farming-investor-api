@@ -7,16 +7,24 @@ export class BlobStorageService {
   private readonly logger = new Logger(BlobStorageService.name);
 
   async uploadUserPhoto(file: Express.Multer.File): Promise<string> {
+    return this.upload(file, 'uploads/photos');
+  }
+
+  async uploadBannerPhoto(file: Express.Multer.File): Promise<string> {
+    return this.upload(file, 'uploads/banners');
+  }
+
+  private async upload(file: Express.Multer.File, prefix: string): Promise<string> {
     if (!file || !file.buffer) {
       throw new InternalServerErrorException('No file buffer provided for upload');
     }
 
     try {
       const blob = await put(
-        `uploads/photos/${Date.now()}-${file.originalname}`,
+        `${prefix}/${Date.now()}-${file.originalname}`,
         file.buffer,
         {
-          access: 'public',
+          access: 'private',
           addRandomSuffix: true,
           token: 'vercel_blob_rw_UWXMYKXOXviIXovH_uPqlndwmUlLFGBHzTUofVwks4i2yN5',
         },

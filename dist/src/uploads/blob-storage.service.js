@@ -15,13 +15,20 @@ let BlobStorageService = BlobStorageService_1 = class BlobStorageService {
         this.logger = new common_1.Logger(BlobStorageService_1.name);
     }
     async uploadUserPhoto(file) {
+        return this.upload(file, 'uploads/photos');
+    }
+    async uploadBannerPhoto(file) {
+        return this.upload(file, 'uploads/banners');
+    }
+    async upload(file, prefix) {
         if (!file || !file.buffer) {
             throw new common_1.InternalServerErrorException('No file buffer provided for upload');
         }
         try {
-            const blob = await (0, blob_1.put)(`user-photos/${Date.now()}-${file.originalname}`, file.buffer, {
-                access: 'public',
+            const blob = await (0, blob_1.put)(`${prefix}/${Date.now()}-${file.originalname}`, file.buffer, {
+                access: 'private',
                 addRandomSuffix: true,
+                token: 'vercel_blob_rw_UWXMYKXOXviIXovH_uPqlndwmUlLFGBHzTUofVwks4i2yN5',
             });
             return blob.url;
         }

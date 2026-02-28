@@ -56,6 +56,8 @@ __decorate([
     __metadata("design:type", Boolean)
 ], UserEntity.prototype, "isBanned", void 0);
 exports.UserEntity = UserEntity = __decorate([
-    (0, typeorm_1.Entity)('tbl_users')
+    (0, typeorm_1.Entity)('tbl_users'),
+    (0, typeorm_1.Index)(['role']),
+    (0, typeorm_1.Index)(['isBanned'])
 ], UserEntity);
 //# sourceMappingURL=user.entity.js.map

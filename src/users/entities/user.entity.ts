@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
 
 export enum UserRole {
   ADMIN = 'admin',
@@ -6,6 +6,8 @@ export enum UserRole {
 }
 
 @Entity('tbl_users')
+@Index(['role'])
+@Index(['isBanned'])
 export class UserEntity {
   @PrimaryGeneratedColumn()
   id: number;

@@ -14,6 +14,7 @@ const config_1 = require("@nestjs/config");
 const typeorm_1 = require("@nestjs/typeorm");
 const users_module_1 = require("./users/users.module");
 const uploads_module_1 = require("./uploads/uploads.module");
+const banner_module_1 = require("./banner/banner.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -38,6 +39,7 @@ exports.AppModule = AppModule = __decorate([
             }),
             users_module_1.UsersModule,
             uploads_module_1.UploadsModule,
+            banner_module_1.BannerModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],
