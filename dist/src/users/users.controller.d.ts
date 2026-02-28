@@ -6,12 +6,15 @@ import { LoginUserDto } from './dto/login-user.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { JwtService } from '@nestjs/jwt';
-import type { Express, Request } from 'express';
+import { Request } from 'express';
+import * as Express from 'express';
+import { BlobStorageService } from '../uploads/blob-storage.service';
 export declare class UsersController {
     private readonly usersService;
     private readonly jwtService;
-    constructor(usersService: UsersService, jwtService: JwtService);
-    create(req: Request, file: Express.Multer.File, createUserDto: CreateUserDto): Promise<{
+    private readonly blobStorageService;
+    constructor(usersService: UsersService, jwtService: JwtService, blobStorageService: BlobStorageService);
+    create(file: Express.Multer.File, createUserDto: CreateUserDto): Promise<{
         statusCode: HttpStatus;
         message: string;
         data: import("./entities/user.entity").UserEntity;
@@ -55,7 +58,7 @@ export declare class UsersController {
         message: string;
         data: import("./entities/user.entity").UserEntity;
     }>;
-    update(id: number, req: Request, file: Express.Multer.File, updateUserDto: UpdateUserDto): Promise<{
+    update(id: number, file: Express.Multer.File, updateUserDto: UpdateUserDto): Promise<{
         statusCode: HttpStatus;
         message: string;
         data: import("./entities/user.entity").UserEntity;

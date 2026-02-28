@@ -23,24 +23,26 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
+import * as Express from 'express';
+import { BlobStorageService } from '../uploads/blob-storage.service';
 
 @Controller('users')
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
+    private readonly blobStorageService: BlobStorageService,
   ) {}
 
   @Post()
   @UseInterceptors(FileInterceptor('photo'))
   async create(
-    @Req() req: Request,
-    @UploadedFile() file: any,
+    @UploadedFile() file: Express.Multer.File,
     @Body() createUserDto: CreateUserDto,
   ) {
     if (file) {
-      const baseUrl = `${req.protocol}://${req.get('host')}`;
-      createUserDto.photoUrl = `${baseUrl}/uploads/${file.filename}`;
+      createUserDto.photoUrl =
+        await this.blobStorageService.uploadUserPhoto(file);
     }
 
     const user = await this.usersService.create(createUserDto);
@@ -139,13 +141,12 @@ export class UsersController {
   @UseInterceptors(FileInterceptor('photo'))
   async update(
     @Param('id') id: number,
-    @Req() req: Request,
-    @UploadedFile() file: any,
+    @UploadedFile() file: Express.Multer.File,
     @Body() updateUserDto: UpdateUserDto,
   ) {
     if (file) {
-      const baseUrl = `${req.protocol}://${req.get('host')}`;
-      updateUserDto.photoUrl = `${baseUrl}/uploads/${file.filename}`;
+      updateUserDto.photoUrl =
+        await this.blobStorageService.uploadUserPhoto(file);
     }
 
     const user = await this.usersService.update(Number(id), updateUserDto);
