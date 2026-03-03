@@ -80,6 +80,64 @@ let InvestmentsService = class InvestmentsService {
             relations: ['project', 'user'],
         });
     }
+    async update(id, updateInvestmentDto) {
+        const investment = await this.investmentRepository.findOne({
+            where: { id },
+        });
+        if (!investment) {
+            throw new common_1.NotFoundException(`Investment with id "${id}" not found`);
+        }
+        const newAmount = Number(updateInvestmentDto.amount);
+        if (newAmount <= 0) {
+            throw new common_1.BadRequestException('Investment amount must be greater than 0');
+        }
+        const previousAmount = Number(investment.amount);
+        if (newAmount === previousAmount) {
+            return this.findOne(id);
+        }
+        const project = await this.projectRepository.findOne({
+            where: { id: investment.projectId },
+            select: [
+                'id',
+                'totalPrice',
+                'collectedAmount',
+                'status',
+                'minInvestmentAmount',
+            ],
+        });
+        if (!project) {
+            throw new common_1.NotFoundException(`Project with id "${investment.projectId}" not found`);
+        }
+        if (project.status === project_entity_1.ProjectStatus.CLOSED) {
+            throw new common_1.BadRequestException('Cannot update a closed project investment');
+        }
+        const minAmount = Number(project.minInvestmentAmount ?? 0);
+        if (minAmount > 0 && newAmount < minAmount) {
+            throw new common_1.BadRequestException(`Minimum investment for this project is ${minAmount}. You set ${newAmount}.`);
+        }
+        const delta = newAmount - previousAmount;
+        const currentCollected = Number(project.collectedAmount);
+        const newCollected = currentCollected + delta;
+        if (newCollected < 0) {
+            throw new common_1.BadRequestException('Updated amount would make collected amount negative');
+        }
+        if (newCollected > Number(project.totalPrice)) {
+            const remainingAmount = Number(project.totalPrice) - Number(project.collectedAmount);
+            throw new common_1.BadRequestException(`Investment amount cannot exceed remaining amount (${remainingAmount})`);
+        }
+        investment.amount = newAmount;
+        await this.investmentRepository.save(investment);
+        if (delta > 0) {
+            await this.projectsService.incrementCollectedAmount(investment.projectId, delta);
+        }
+        else if (delta < 0) {
+            await this.projectsService.decrementCollectedAmount(investment.projectId, -delta);
+        }
+        return this.investmentRepository.findOne({
+            where: { id: investment.id },
+            relations: ['project', 'user'],
+        });
+    }
     async findAllByUser(userId, options = {}) {
         const { page = 1, limit = 10, search } = options;
         const safeLimit = Math.min(Math.max(1, limit), 100);

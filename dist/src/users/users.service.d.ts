@@ -35,4 +35,5 @@ export declare class UsersService {
     resetPassword(resetPasswordDto: ResetPasswordDto): Promise<void>;
     ban(id: number): Promise<UserEntity>;
     unban(id: number): Promise<UserEntity>;
+    logout(): Promise<void>;
 }

@@ -166,6 +166,9 @@ let UsersService = class UsersService {
         user.isBanned = false;
         return this.usersRepository.save(user);
     }
+    async logout() {
+        return;
+    }
 };
 exports.UsersService = UsersService;
 exports.UsersService = UsersService = __decorate([

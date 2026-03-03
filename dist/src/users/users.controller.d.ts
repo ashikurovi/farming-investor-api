@@ -32,11 +32,6 @@ export declare class UsersController {
             };
         };
     }>;
-    findOne(id: number): Promise<{
-        statusCode: HttpStatus;
-        message: string;
-        data: import("./entities/user.entity").UserEntity;
-    }>;
     login(loginUserDto: LoginUserDto): Promise<{
         statusCode: HttpStatus;
         message: string;
@@ -45,11 +40,7 @@ export declare class UsersController {
             user: import("./entities/user.entity").UserEntity;
         };
     }>;
-    forgotPassword(forgotPasswordDto: ForgotPasswordDto): Promise<{
-        statusCode: HttpStatus;
-        message: string;
-    }>;
-    resetPassword(resetPasswordDto: ResetPasswordDto): Promise<{
+    logout(): Promise<{
         statusCode: HttpStatus;
         message: string;
     }>;
@@ -57,6 +48,19 @@ export declare class UsersController {
         statusCode: HttpStatus;
         message: string;
         data: import("./entities/user.entity").UserEntity;
+    }>;
+    findOne(id: string): Promise<{
+        statusCode: HttpStatus;
+        message: string;
+        data: import("./entities/user.entity").UserEntity;
+    }>;
+    forgotPassword(forgotPasswordDto: ForgotPasswordDto): Promise<{
+        statusCode: HttpStatus;
+        message: string;
+    }>;
+    resetPassword(resetPasswordDto: ResetPasswordDto): Promise<{
+        statusCode: HttpStatus;
+        message: string;
     }>;
     update(id: number, file: Express.Multer.File, updateUserDto: UpdateUserDto): Promise<{
         statusCode: HttpStatus;

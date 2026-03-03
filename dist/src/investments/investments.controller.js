@@ -16,6 +16,7 @@ exports.InvestmentsController = void 0;
 const common_1 = require("@nestjs/common");
 const investments_service_1 = require("./investments.service");
 const create_investment_dto_1 = require("./dto/create-investment.dto");
+const update_investment_dto_1 = require("./dto/update-investment.dto");
 const jwt_auth_guard_1 = require("../common/guards/jwt-auth.guard");
 const user_decorator_1 = require("../common/decorators/user.decorator");
 let InvestmentsController = class InvestmentsController {
@@ -100,6 +101,14 @@ let InvestmentsController = class InvestmentsController {
             data: investment,
         };
     }
+    async update(id, updateInvestmentDto) {
+        const investment = await this.investmentsService.update(+id, updateInvestmentDto);
+        return {
+            statusCode: common_1.HttpStatus.OK,
+            message: 'Investment updated successfully',
+            data: investment,
+        };
+    }
     async remove(id, userId) {
         await this.investmentsService.remove(+id, userId);
         return {
@@ -171,6 +180,14 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], InvestmentsController.prototype, "findOne", null);
+__decorate([
+    (0, common_1.Patch)(':id'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, update_investment_dto_1.UpdateInvestmentDto]),
+    __metadata("design:returntype", Promise)
+], InvestmentsController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(':id'),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),

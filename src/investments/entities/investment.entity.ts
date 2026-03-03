@@ -3,6 +3,7 @@ import {
   CreateDateColumn,
   Entity,
   Index,
+  JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -34,10 +35,12 @@ export class InvestmentEntity {
   updatedAt: Date;
 
   @ManyToOne(() => UserEntity, (user) => user.investments, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'user_id' })
   user: UserEntity;
 
   @ManyToOne(() => ProjectEntity, (project) => project.investments, {
     onDelete: 'CASCADE',
   })
+  @JoinColumn({ name: 'project_id' })
   project: ProjectEntity;
 }

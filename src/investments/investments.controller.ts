@@ -6,12 +6,14 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  Patch,
   Post,
   Query,
   UseGuards,
 } from '@nestjs/common';
 import { InvestmentsService } from './investments.service';
 import { CreateInvestmentDto } from './dto/create-investment.dto';
+import { UpdateInvestmentDto } from './dto/update-investment.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/user.decorator';
 
@@ -135,6 +137,22 @@ export class InvestmentsController {
     return {
       statusCode: HttpStatus.OK,
       message: 'Investment fetched successfully',
+      data: investment,
+    };
+  }
+
+  @Patch(':id')
+  async update(
+    @Param('id') id: string,
+    @Body() updateInvestmentDto: UpdateInvestmentDto,
+  ) {
+    const investment = await this.investmentsService.update(
+      +id,
+      updateInvestmentDto,
+    );
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Investment updated successfully',
       data: investment,
     };
   }

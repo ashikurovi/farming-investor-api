@@ -6,6 +6,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateInvestmentDto } from './dto/create-investment.dto';
+import { UpdateInvestmentDto } from './dto/update-investment.dto';
 import { InvestmentEntity } from './entities/investment.entity';
 import { ProjectEntity, ProjectStatus } from '../projects/entities/project.entity';
 import { ProjectsService } from '../projects/projects.service';
@@ -83,6 +84,92 @@ export class InvestmentsService {
     }
 
     await this.projectsService.incrementCollectedAmount(projectId, amount);
+
+    return this.investmentRepository.findOne({
+      where: { id: investment.id },
+      relations: ['project', 'user'],
+    }) as Promise<InvestmentEntity>;
+  }
+
+  async update(
+    id: number,
+    updateInvestmentDto: UpdateInvestmentDto,
+  ): Promise<InvestmentEntity> {
+    const investment = await this.investmentRepository.findOne({
+      where: { id },
+    });
+    if (!investment) {
+      throw new NotFoundException(`Investment with id "${id}" not found`);
+    }
+
+    const newAmount = Number(updateInvestmentDto.amount);
+    if (newAmount <= 0) {
+      throw new BadRequestException(
+        'Investment amount must be greater than 0',
+      );
+    }
+
+    const previousAmount = Number(investment.amount);
+    if (newAmount === previousAmount) {
+      return this.findOne(id);
+    }
+
+    const project = await this.projectRepository.findOne({
+      where: { id: investment.projectId },
+      select: [
+        'id',
+        'totalPrice',
+        'collectedAmount',
+        'status',
+        'minInvestmentAmount',
+      ],
+    });
+    if (!project) {
+      throw new NotFoundException(
+        `Project with id "${investment.projectId}" not found`,
+      );
+    }
+    if (project.status === ProjectStatus.CLOSED) {
+      throw new BadRequestException('Cannot update a closed project investment');
+    }
+
+    const minAmount = Number(project.minInvestmentAmount ?? 0);
+    if (minAmount > 0 && newAmount < minAmount) {
+      throw new BadRequestException(
+        `Minimum investment for this project is ${minAmount}. You set ${newAmount}.`,
+      );
+    }
+
+    const delta = newAmount - previousAmount;
+    const currentCollected = Number(project.collectedAmount);
+    const newCollected = currentCollected + delta;
+    if (newCollected < 0) {
+      throw new BadRequestException(
+        'Updated amount would make collected amount negative',
+      );
+    }
+    if (newCollected > Number(project.totalPrice)) {
+      const remainingAmount =
+        Number(project.totalPrice) - Number(project.collectedAmount);
+      throw new BadRequestException(
+        `Investment amount cannot exceed remaining amount (${remainingAmount})`,
+      );
+    }
+
+    investment.amount = newAmount;
+    await this.investmentRepository.save(investment);
+
+    if (delta > 0) {
+      await this.projectsService.incrementCollectedAmount(
+        investment.projectId,
+        delta,
+      );
+    } else if (delta < 0) {
+      await this.projectsService.decrementCollectedAmount(
+        investment.projectId,
+        -delta,
+      );
+    }
 
     return this.investmentRepository.findOne({
       where: { id: investment.id },

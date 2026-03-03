@@ -1,6 +1,7 @@
 import { HttpStatus } from '@nestjs/common';
 import { InvestmentsService } from './investments.service';
 import { CreateInvestmentDto } from './dto/create-investment.dto';
+import { UpdateInvestmentDto } from './dto/update-investment.dto';
 export declare class InvestmentsController {
     private readonly investmentsService;
     constructor(investmentsService: InvestmentsService);
@@ -78,6 +79,11 @@ export declare class InvestmentsController {
         };
     }>;
     findOne(id: string): Promise<{
+        statusCode: HttpStatus;
+        message: string;
+        data: import("./entities/investment.entity").InvestmentEntity;
+    }>;
+    update(id: string, updateInvestmentDto: UpdateInvestmentDto): Promise<{
         statusCode: HttpStatus;
         message: string;
         data: import("./entities/investment.entity").InvestmentEntity;

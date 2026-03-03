@@ -42,12 +42,14 @@ __decorate([
 ], InvestmentEntity.prototype, "updatedAt", void 0);
 __decorate([
     (0, typeorm_1.ManyToOne)(() => user_entity_1.UserEntity, (user) => user.investments, { onDelete: 'CASCADE' }),
+    (0, typeorm_1.JoinColumn)({ name: 'user_id' }),
     __metadata("design:type", user_entity_1.UserEntity)
 ], InvestmentEntity.prototype, "user", void 0);
 __decorate([
     (0, typeorm_1.ManyToOne)(() => project_entity_1.ProjectEntity, (project) => project.investments, {
         onDelete: 'CASCADE',
     }),
+    (0, typeorm_1.JoinColumn)({ name: 'project_id' }),
     __metadata("design:type", project_entity_1.ProjectEntity)
 ], InvestmentEntity.prototype, "project", void 0);
 exports.InvestmentEntity = InvestmentEntity = __decorate([

@@ -91,13 +91,6 @@ let UsersController = class UsersController {
             data: result,
         };
     }
-    findOne(id) {
-        return this.usersService.findOne(Number(id)).then((user) => ({
-            statusCode: common_1.HttpStatus.OK,
-            message: 'User fetched successfully',
-            data: user,
-        }));
-    }
     async login(loginUserDto) {
         const result = await this.usersService.login(loginUserDto);
         return {
@@ -105,6 +98,43 @@ let UsersController = class UsersController {
             message: 'Login successful',
             data: result,
         };
+    }
+    async logout() {
+        await this.usersService.logout();
+        return {
+            statusCode: common_1.HttpStatus.OK,
+            message: 'Logout successful',
+        };
+    }
+    async me(req) {
+        try {
+            const authHeader = req.headers.authorization;
+            if (!authHeader || !authHeader.startsWith('Bearer ')) {
+                throw new common_1.UnauthorizedException('Missing or invalid Authorization header');
+            }
+            const token = authHeader.split(' ')[1];
+            const payload = await this.jwtService.verifyAsync(token);
+            const user = await this.usersService.findOne(payload.sub);
+            return {
+                statusCode: common_1.HttpStatus.OK,
+                message: 'User profile fetched successfully',
+                data: user,
+            };
+        }
+        catch (error) {
+            throw new common_1.UnauthorizedException('Invalid or expired token');
+        }
+    }
+    findOne(id) {
+        const numericId = Number(id);
+        if (Number.isNaN(numericId)) {
+            throw new common_1.UnauthorizedException('Invalid user id');
+        }
+        return this.usersService.findOne(numericId).then((user) => ({
+            statusCode: common_1.HttpStatus.OK,
+            message: 'User fetched successfully',
+            data: user,
+        }));
     }
     async forgotPassword(forgotPasswordDto) {
         await this.usersService.forgotPassword(forgotPasswordDto);
@@ -118,26 +148,6 @@ let UsersController = class UsersController {
         return {
             statusCode: common_1.HttpStatus.OK,
             message: 'Password reset successful',
-        };
-    }
-    async me(req) {
-        const authHeader = req.headers.authorization;
-        if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            throw new common_1.UnauthorizedException('Missing or invalid Authorization header');
-        }
-        const token = authHeader.split(' ')[1];
-        let payload;
-        try {
-            payload = this.jwtService.verify(token);
-        }
-        catch {
-            throw new common_1.UnauthorizedException('Invalid token');
-        }
-        const user = await this.usersService.findOne(payload.sub);
-        return {
-            statusCode: common_1.HttpStatus.OK,
-            message: 'User profile fetched successfully',
-            data: user,
         };
     }
     async update(id, file, updateUserDto) {
@@ -195,19 +205,33 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "findAll", null);
 __decorate([
-    (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Param)('id')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number]),
-    __metadata("design:returntype", void 0)
-], UsersController.prototype, "findOne", null);
-__decorate([
     (0, common_1.Post)('login'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [login_user_dto_1.LoginUserDto]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "login", null);
+__decorate([
+    (0, common_1.Post)('logout'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "logout", null);
+__decorate([
+    (0, common_1.Get)('me'),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_c = typeof express_1.Request !== "undefined" && express_1.Request) === "function" ? _c : Object]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "me", null);
+__decorate([
+    (0, common_1.Get)(':id'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], UsersController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Post)('forgot-password'),
     __param(0, (0, common_1.Body)()),
@@ -222,13 +246,6 @@ __decorate([
     __metadata("design:paramtypes", [reset_password_dto_1.ResetPasswordDto]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "resetPassword", null);
-__decorate([
-    (0, common_1.Get)('me'),
-    __param(0, (0, common_1.Req)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_c = typeof express_1.Request !== "undefined" && express_1.Request) === "function" ? _c : Object]),
-    __metadata("design:returntype", Promise)
-], UsersController.prototype, "me", null);
 __decorate([
     (0, common_1.Patch)(':id'),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('photo')),

@@ -1,5 +1,6 @@
 import { Repository } from 'typeorm';
 import { CreateInvestmentDto } from './dto/create-investment.dto';
+import { UpdateInvestmentDto } from './dto/update-investment.dto';
 import { InvestmentEntity } from './entities/investment.entity';
 import { ProjectEntity } from '../projects/entities/project.entity';
 import { ProjectsService } from '../projects/projects.service';
@@ -11,6 +12,7 @@ export declare class InvestmentsService {
     private readonly projectsService;
     constructor(investmentRepository: Repository<InvestmentEntity>, projectRepository: Repository<ProjectEntity>, userRepository: Repository<UserEntity>, projectsService: ProjectsService);
     invest(userId: number, createInvestmentDto: CreateInvestmentDto): Promise<InvestmentEntity>;
+    update(id: number, updateInvestmentDto: UpdateInvestmentDto): Promise<InvestmentEntity>;
     findAllByUser(userId: number, options?: {
         page?: number;
         limit?: number;
