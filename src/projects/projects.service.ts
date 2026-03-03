@@ -42,7 +42,12 @@ export class ProjectsService {
     const { page = 1, limit = 10, search, status } = options;
     const safeLimit = Math.min(Math.max(1, limit), 100);
 
-    const queryBuilder = this.projectRepository.createQueryBuilder('project');
+    const queryBuilder = this.projectRepository
+      .createQueryBuilder('project')
+      .leftJoinAndSelect('project.projectPeriod', 'projectPeriod')
+      .leftJoinAndSelect('project.investments', 'investment')
+      .leftJoinAndSelect('investment.user', 'user')
+      .leftJoinAndSelect('investment.project', 'investmentProject');
 
     if (search && search.trim() !== '') {
       const likeSearch = `%${search.trim()}%`;
@@ -57,7 +62,6 @@ export class ProjectsService {
     }
 
     queryBuilder
-      .leftJoinAndSelect('project.projectPeriod', 'projectPeriod')
       .orderBy('project.createdAt', 'DESC')
       .skip((page - 1) * safeLimit)
       .take(safeLimit);
@@ -76,7 +80,7 @@ export class ProjectsService {
     const project = await this.projectRepository.findOne({
       where: { id },
       relations: loadInvestments
-        ? ['investments', 'projectPeriod']
+        ? ['projectPeriod', 'investments', 'investments.user', 'investments.project']
         : ['projectPeriod'],
     });
     if (!project) {

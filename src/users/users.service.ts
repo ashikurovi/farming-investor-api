@@ -48,7 +48,12 @@ export class UsersService {
       search,
     } = options;
 
-    const queryBuilder = this.usersRepository.createQueryBuilder('user');
+    const safeLimit = Math.min(Math.max(1, limit), 100);
+
+    const queryBuilder = this.usersRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.investments', 'investment')
+      .leftJoinAndSelect('investment.project', 'project');
 
     if (search && search.trim() !== '') {
       const likeSearch = `%${search.trim()}%`;
@@ -60,26 +65,29 @@ export class UsersService {
 
     queryBuilder
       .orderBy('user.id', 'DESC')
-      .skip((page - 1) * limit)
-      .take(limit);
+      .skip((page - 1) * safeLimit)
+      .take(safeLimit);
 
     const [items, total] = await queryBuilder.getManyAndCount();
 
-    const pageCount = limit > 0 ? Math.ceil(total / limit) || 1 : 1;
+    const pageCount = safeLimit > 0 ? Math.ceil(total / safeLimit) || 1 : 1;
 
     return {
       items,
       meta: {
         total,
         page,
-        limit,
+        limit: safeLimit,
         pageCount,
       },
     };
   }
 
   async findOne(id: number): Promise<UserEntity> {
-    const user = await this.usersRepository.findOne({ where: { id } });
+    const user = await this.usersRepository.findOne({
+      where: { id },
+      relations: ['investments', 'investments.project'],
+    });
     if (!user) {
       throw new NotFoundException(`User with id "${id}" not found`);
     }

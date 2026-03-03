@@ -73,29 +73,36 @@ let UsersService = class UsersService {
     }
     async findAll(options = {}) {
         const { page = 1, limit = 10, search, } = options;
-        const queryBuilder = this.usersRepository.createQueryBuilder('user');
+        const safeLimit = Math.min(Math.max(1, limit), 100);
+        const queryBuilder = this.usersRepository
+            .createQueryBuilder('user')
+            .leftJoinAndSelect('user.investments', 'investment')
+            .leftJoinAndSelect('investment.project', 'project');
         if (search && search.trim() !== '') {
             const likeSearch = `%${search.trim()}%`;
             queryBuilder.andWhere('(user.name LIKE :search OR user.email LIKE :search OR user.phone LIKE :search)', { search: likeSearch });
         }
         queryBuilder
             .orderBy('user.id', 'DESC')
-            .skip((page - 1) * limit)
-            .take(limit);
+            .skip((page - 1) * safeLimit)
+            .take(safeLimit);
         const [items, total] = await queryBuilder.getManyAndCount();
-        const pageCount = limit > 0 ? Math.ceil(total / limit) || 1 : 1;
+        const pageCount = safeLimit > 0 ? Math.ceil(total / safeLimit) || 1 : 1;
         return {
             items,
             meta: {
                 total,
                 page,
-                limit,
+                limit: safeLimit,
                 pageCount,
             },
         };
     }
     async findOne(id) {
-        const user = await this.usersRepository.findOne({ where: { id } });
+        const user = await this.usersRepository.findOne({
+            where: { id },
+            relations: ['investments', 'investments.project'],
+        });
         if (!user) {
             throw new common_1.NotFoundException(`User with id "${id}" not found`);
         }
