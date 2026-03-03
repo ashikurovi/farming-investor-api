@@ -168,4 +168,10 @@ export class UsersService {
     user.isBanned = false;
     return this.usersRepository.save(user);
   }
+
+  // Stateless logout: no server-side token storage to clear.
+  // Kept for symmetry and future extensibility (e.g. token blacklist).
+  async logout(): Promise<void> {
+    return;
+  }
 }

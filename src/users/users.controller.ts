@@ -75,16 +75,6 @@ export class UsersController {
     };
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: number) {
-    return this.usersService.findOne(Number(id)).then((user) => ({
-      statusCode: HttpStatus.OK,
-        message: 'User fetched successfully',
-        data: user,
-      }),
-    );
-  }
-
   @Post('login')
   async login(@Body() loginUserDto: LoginUserDto) {
     const result = await this.usersService.login(loginUserDto);
@@ -93,6 +83,57 @@ export class UsersController {
       message: 'Login successful',
       data: result,
     };
+  }
+
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  async logout() {
+    // Stateless JWT logout: delegate to service (no-op for now)
+    await this.usersService.logout();
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Logout successful',
+    };
+  }
+
+  @Get('me')
+  async me(@Req() req: Request) {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        throw new UnauthorizedException(
+          'Missing or invalid Authorization header',
+        );
+      }
+
+      const token = authHeader.split(' ')[1];
+      const payload: any = await this.jwtService.verifyAsync(token);
+
+      const user = await this.usersService.findOne(payload.sub);
+
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'User profile fetched successfully',
+        data: user,
+      };
+    } catch (error) {
+      // Normalize any verification / lookup errors into 401 for the client
+      throw new UnauthorizedException('Invalid or expired token');
+    }
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    const numericId = Number(id);
+    if (Number.isNaN(numericId)) {
+      throw new UnauthorizedException('Invalid user id');
+    }
+
+    return this.usersService.findOne(numericId).then((user) => ({
+      statusCode: HttpStatus.OK,
+      message: 'User fetched successfully',
+      data: user,
+    }));
   }
 
   @Post('forgot-password')
@@ -110,30 +151,6 @@ export class UsersController {
     return {
       statusCode: HttpStatus.OK,
       message: 'Password reset successful',
-    };
-  }
-
-  @Get('me')
-  async me(@Req() req: Request) {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      throw new UnauthorizedException('Missing or invalid Authorization header');
-    }
-
-    const token = authHeader.split(' ')[1];
-    let payload: any;
-    try {
-      payload = this.jwtService.verify(token);
-    } catch {
-      throw new UnauthorizedException('Invalid token');
-    }
-
-    const user = await this.usersService.findOne(payload.sub);
-
-    return {
-      statusCode: HttpStatus.OK,
-      message: 'User profile fetched successfully',
-      data: user,
     };
   }
 
