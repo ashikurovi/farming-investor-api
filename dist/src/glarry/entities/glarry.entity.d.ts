@@ -1,6 +1,7 @@
-import { ProjectEntity } from '../../projects/entities/project.entity';
+import { Project } from '../../projects/entities/project.entity';
 export declare class GlarryEntity {
     id: number;
+    projectId: number;
     photoUrl: string;
-    project: ProjectEntity;
+    project: Project;
 }

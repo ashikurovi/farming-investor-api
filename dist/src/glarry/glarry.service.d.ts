@@ -2,17 +2,13 @@ import { Repository } from 'typeorm';
 import { GlarryEntity } from './entities/glarry.entity';
 import { CreateGlarryDto } from './dto/create-glarry.dto';
 import { UpdateGlarryDto } from './dto/update-glarry.dto';
-import { ProjectEntity } from 'src/projects/entities/project.entity';
 export type GlarryResponse = {
     id: number;
     photoUrl: string;
-    projectId: number;
-    projectTitle: string;
 };
 export declare class GlarryService {
     private readonly glarryRepo;
-    private readonly projectRepo;
-    constructor(glarryRepo: Repository<GlarryEntity>, projectRepo: Repository<ProjectEntity>);
+    constructor(glarryRepo: Repository<GlarryEntity>);
     create(createGlarryDto: CreateGlarryDto): Promise<GlarryResponse>;
     findAll(options?: {
         page?: number;

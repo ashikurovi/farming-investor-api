@@ -9,24 +9,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProjectsModule = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
-const projects_controller_1 = require("./projects.controller");
 const projects_service_1 = require("./projects.service");
+const projects_controller_1 = require("./projects.controller");
 const project_entity_1 = require("./entities/project.entity");
-const investment_entity_1 = require("../investments/entities/investment.entity");
-const project_period_entity_1 = require("../project-period/entities/project-period.entity");
-const project_period_module_1 = require("../project-period/project-period.module");
 let ProjectsModule = class ProjectsModule {
 };
 exports.ProjectsModule = ProjectsModule;
 exports.ProjectsModule = ProjectsModule = __decorate([
     (0, common_1.Module)({
-        imports: [
-            typeorm_1.TypeOrmModule.forFeature([project_entity_1.ProjectEntity, project_period_entity_1.ProjectPeriodEntity, investment_entity_1.InvestmentEntity]),
-            project_period_module_1.ProjectPeriodModule,
-        ],
+        imports: [typeorm_1.TypeOrmModule.forFeature([project_entity_1.Project])],
         controllers: [projects_controller_1.ProjectsController],
         providers: [projects_service_1.ProjectsService],
-        exports: [projects_service_1.ProjectsService],
     })
 ], ProjectsModule);
 //# sourceMappingURL=projects.module.js.map

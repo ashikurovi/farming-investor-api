@@ -52,22 +52,34 @@ const typeorm_2 = require("typeorm");
 const jwt_1 = require("@nestjs/jwt");
 const bcrypt = __importStar(require("bcrypt"));
 const user_entity_1 = require("./entities/user.entity");
+const investor_type_entity_1 = require("../investor-type/entities/investor-type.entity");
 let UsersService = class UsersService {
-    constructor(usersRepository, jwtService) {
+    constructor(usersRepository, investorTypeRepository, jwtService) {
         this.usersRepository = usersRepository;
+        this.investorTypeRepository = investorTypeRepository;
         this.jwtService = jwtService;
     }
     async create(createUserDto) {
-        const existing = await this.usersRepository.findOne({
+        let investorType = null;
+        if (createUserDto.investorTypeId != null) {
+            investorType = await this.investorTypeRepository.findOne({
+                where: { id: createUserDto.investorTypeId },
+            });
+            if (!investorType) {
+                throw new common_1.BadRequestException('Investor type not found');
+            }
+        }
+        const existingUser = await this.usersRepository.findOne({
             where: { email: createUserDto.email },
         });
-        if (existing) {
+        if (existingUser) {
             throw new common_1.BadRequestException('Email already exists');
         }
         const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
         const user = this.usersRepository.create({
             ...createUserDto,
             password: hashedPassword,
+            investorType: investorType ?? undefined,
         });
         return this.usersRepository.save(user);
     }
@@ -76,8 +88,7 @@ let UsersService = class UsersService {
         const safeLimit = Math.min(Math.max(1, limit), 100);
         const queryBuilder = this.usersRepository
             .createQueryBuilder('user')
-            .leftJoinAndSelect('user.investments', 'investment')
-            .leftJoinAndSelect('investment.project', 'project');
+            .leftJoinAndSelect('user.investorType', 'investorType');
         if (search && search.trim() !== '') {
             const likeSearch = `%${search.trim()}%`;
             queryBuilder.andWhere('(user.name LIKE :search OR user.email LIKE :search OR user.phone LIKE :search)', { search: likeSearch });
@@ -101,7 +112,7 @@ let UsersService = class UsersService {
     async findOne(id) {
         const user = await this.usersRepository.findOne({
             where: { id },
-            relations: ['investments', 'investments.project'],
+            relations: ['investorType'],
         });
         if (!user) {
             throw new common_1.NotFoundException(`User with id "${id}" not found`);
@@ -181,7 +192,9 @@ exports.UsersService = UsersService;
 exports.UsersService = UsersService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(user_entity_1.UserEntity)),
+    __param(1, (0, typeorm_1.InjectRepository)(investor_type_entity_1.InvestorTypeEntity)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository,
         jwt_1.JwtService])
 ], UsersService);
 //# sourceMappingURL=users.service.js.map

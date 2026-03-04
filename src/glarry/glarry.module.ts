@@ -3,10 +3,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { GlarryService } from './glarry.service';
 import { GlarryController } from './glarry.controller';
 import { GlarryEntity } from './entities/glarry.entity';
-import { ProjectEntity } from 'src/projects/entities/project.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([GlarryEntity,ProjectEntity])],
+  imports: [TypeOrmModule.forFeature([GlarryEntity])],
   controllers: [GlarryController],
   providers: [GlarryService],
 })

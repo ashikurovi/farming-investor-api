@@ -15,11 +15,11 @@ const typeorm_1 = require("@nestjs/typeorm");
 const users_module_1 = require("./users/users.module");
 const uploads_module_1 = require("./uploads/uploads.module");
 const banner_module_1 = require("./banner/banner.module");
-const project_period_module_1 = require("./project-period/project-period.module");
 const auth_module_1 = require("./auth/auth.module");
-const projects_module_1 = require("./projects/projects.module");
-const investments_module_1 = require("./investments/investments.module");
 const glarry_module_1 = require("./glarry/glarry.module");
+const projects_module_1 = require("./projects/projects.module");
+const investor_type_module_1 = require("./investor-type/investor-type.module");
+const contact_module_1 = require("./contact/contact.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -48,10 +48,10 @@ exports.AppModule = AppModule = __decorate([
             users_module_1.UsersModule,
             uploads_module_1.UploadsModule,
             banner_module_1.BannerModule,
-            project_period_module_1.ProjectPeriodModule,
-            projects_module_1.ProjectsModule,
-            investments_module_1.InvestmentsModule,
             glarry_module_1.GlarryModule,
+            projects_module_1.ProjectsModule,
+            investor_type_module_1.InvestorTypeModule,
+            contact_module_1.ContactModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

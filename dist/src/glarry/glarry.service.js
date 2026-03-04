@@ -17,20 +17,13 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const glarry_entity_1 = require("./entities/glarry.entity");
-const project_entity_1 = require("../projects/entities/project.entity");
 let GlarryService = class GlarryService {
-    constructor(glarryRepo, projectRepo) {
+    constructor(glarryRepo) {
         this.glarryRepo = glarryRepo;
-        this.projectRepo = projectRepo;
     }
     async create(createGlarryDto) {
-        const project = await this.projectRepo.findOne({ where: { id: createGlarryDto.projectId } });
-        if (!project) {
-            throw new common_1.NotFoundException(`Project with id "${createGlarryDto.projectId}" not found`);
-        }
         const glarry = this.glarryRepo.create({
             photoUrl: createGlarryDto.photoUrl,
-            project,
         });
         const saved = await this.glarryRepo.save(glarry);
         return this.findOne(saved.id);
@@ -40,13 +33,9 @@ let GlarryService = class GlarryService {
         const safeLimit = Math.min(Math.max(1, limit), 100);
         const qb = this.glarryRepo
             .createQueryBuilder('glarry')
-            .leftJoinAndSelect('glarry.project', 'project')
             .orderBy('glarry.id', 'DESC')
             .skip((page - 1) * safeLimit)
             .take(safeLimit);
-        if (projectId != null) {
-            qb.andWhere('project.id = :projectId', { projectId });
-        }
         const [list, total] = await qb.getManyAndCount();
         const pageCount = safeLimit > 0 ? Math.ceil(total / safeLimit) || 1 : 1;
         return {
@@ -59,8 +48,6 @@ let GlarryService = class GlarryService {
         const safeLimit = Math.min(Math.max(1, limit), 100);
         const qb = this.glarryRepo
             .createQueryBuilder('glarry')
-            .leftJoinAndSelect('glarry.project', 'project')
-            .where('project.id = :projectId', { projectId })
             .orderBy('glarry.id', 'DESC')
             .skip((page - 1) * safeLimit)
             .take(safeLimit);
@@ -74,7 +61,6 @@ let GlarryService = class GlarryService {
     async findOne(id) {
         const glarry = await this.glarryRepo.findOne({
             where: { id },
-            relations: ['project'],
         });
         if (!glarry) {
             throw new common_1.NotFoundException(`Glarry with id "${id}" not found`);
@@ -82,15 +68,12 @@ let GlarryService = class GlarryService {
         return this.toResponse(glarry);
     }
     async update(id, updateGlarryDto) {
-        const glarry = await this.glarryRepo.findOne({ where: { id }, relations: ['project'] });
+        const glarry = await this.glarryRepo.findOne({ where: { id } });
         if (!glarry) {
             throw new common_1.NotFoundException(`Glarry with id "${id}" not found`);
         }
         if (updateGlarryDto.photoUrl != null)
             glarry.photoUrl = updateGlarryDto.photoUrl;
-        if (updateGlarryDto.projectId != null) {
-            glarry.project = { id: updateGlarryDto.projectId };
-        }
         const saved = await this.glarryRepo.save(glarry);
         return this.toResponse(saved);
     }
@@ -104,8 +87,6 @@ let GlarryService = class GlarryService {
         return {
             id: g.id,
             photoUrl: g.photoUrl,
-            projectId: g.project?.id ?? 0,
-            projectTitle: g.project?.title ?? '',
         };
     }
 };
@@ -113,8 +94,6 @@ exports.GlarryService = GlarryService;
 exports.GlarryService = GlarryService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(glarry_entity_1.GlarryEntity)),
-    __param(1, (0, typeorm_1.InjectRepository)(project_entity_1.ProjectEntity)),
-    __metadata("design:paramtypes", [typeorm_2.Repository,
-        typeorm_2.Repository])
+    __metadata("design:paramtypes", [typeorm_2.Repository])
 ], GlarryService);
 //# sourceMappingURL=glarry.service.js.map

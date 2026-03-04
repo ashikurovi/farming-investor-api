@@ -32,9 +32,9 @@ let BlobStorageService = BlobStorageService_1 = class BlobStorageService {
         }
         try {
             const blob = await (0, blob_1.put)(`${prefix}/${Date.now()}-${file.originalname}`, file.buffer, {
-                access: 'private',
+                access: 'public',
                 addRandomSuffix: true,
-                token: 'vercel_blob_rw_UWXMYKXOXviIXovH_uPqlndwmUlLFGBHzTUofVwks4i2yN5',
+                token: 'vercel_blob_rw_NitJ1UUEWJXyZ7XZ_9arbdpBPE6Blu6gXt5HVZkacF1QBux',
             });
             return blob.url;
         }

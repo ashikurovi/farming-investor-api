@@ -1,21 +1,26 @@
 import {
   Column,
   Entity,
-  JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  JoinColumn,
 } from 'typeorm';
-import { ProjectEntity } from '../../projects/entities/project.entity';
+import { Project } from '../../projects/entities/project.entity';
 
 @Entity('tbl_glarry')
 export class GlarryEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column({ name: 'project_id', nullable: true })
+  projectId: number;
+
   @Column({ name: 'photo_url' })
   photoUrl: string;
 
-  @ManyToOne(() => ProjectEntity, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Project, (project) => project.glarry, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'project_id' })
-  project: ProjectEntity;
+  project: Project;
 }

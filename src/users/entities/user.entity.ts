@@ -1,4 +1,12 @@
-import { Column, Entity, Index, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { InvestorTypeEntity } from '../../investor-type/entities/investor-type.entity';
 
 export enum UserRole {
   ADMIN = 'admin',
@@ -36,6 +44,13 @@ export class UserEntity {
   @Column({ default: false })
   isBanned: boolean;
 
-  @OneToMany('InvestmentEntity', 'user')
-  investments: any[];
+  @Column({ name: 'investor_type_id', nullable: true })
+  investorTypeId?: number;
+
+  @ManyToOne(() => InvestorTypeEntity, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn({ name: 'investor_type_id' })
+  investorType?: InvestorTypeEntity;
 }

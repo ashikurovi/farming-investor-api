@@ -1,3 +1,4 @@
+import { InvestorTypeEntity } from '../../investor-type/entities/investor-type.entity';
 export declare enum UserRole {
     ADMIN = "admin",
     INVESTOR = "investor"
@@ -12,5 +13,6 @@ export declare class UserEntity {
     photoUrl?: string;
     role: UserRole;
     isBanned: boolean;
-    investments: any[];
+    investorTypeId?: number;
+    investorType?: InvestorTypeEntity;
 }

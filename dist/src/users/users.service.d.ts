@@ -6,10 +6,12 @@ import { LoginUserDto } from './dto/login-user.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { UserEntity } from './entities/user.entity';
+import { InvestorTypeEntity } from '../investor-type/entities/investor-type.entity';
 export declare class UsersService {
     private readonly usersRepository;
+    private readonly investorTypeRepository;
     private readonly jwtService;
-    constructor(usersRepository: Repository<UserEntity>, jwtService: JwtService);
+    constructor(usersRepository: Repository<UserEntity>, investorTypeRepository: Repository<InvestorTypeEntity>, jwtService: JwtService);
     create(createUserDto: CreateUserDto): Promise<UserEntity>;
     findAll(options?: {
         page?: number;

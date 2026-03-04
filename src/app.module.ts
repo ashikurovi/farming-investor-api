@@ -6,11 +6,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { UploadsModule } from './uploads/uploads.module';
 import { BannerModule } from './banner/banner.module';
-import { ProjectPeriodModule } from './project-period/project-period.module';
 import { AuthModule } from './auth/auth.module';
-import { ProjectsModule } from './projects/projects.module';
-import { InvestmentsModule } from './investments/investments.module';
 import { GlarryModule } from './glarry/glarry.module';
+import { ProjectsModule } from './projects/projects.module';
+import { InvestorTypeModule } from './investor-type/investor-type.module';
+import { ContactModule } from './contact/contact.module';
 
 @Module({
   imports: [
@@ -42,10 +42,10 @@ import { GlarryModule } from './glarry/glarry.module';
     UsersModule,
     UploadsModule,
     BannerModule,
-    ProjectPeriodModule,
-    ProjectsModule,
-    InvestmentsModule,
     GlarryModule,
+    ProjectsModule,
+    InvestorTypeModule,
+    ContactModule,
   ],
 
   controllers: [AppController],

@@ -5,7 +5,9 @@ import {
   IsString,
   IsUrl,
   MinLength,
+  IsNumber,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 import { UserRole } from '../entities/user.entity';
 
 export class UpdateUserDto {
@@ -37,4 +39,9 @@ export class UpdateUserDto {
   @IsOptional()
   @IsUrl()
   photoUrl?: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  investorTypeId?: number;
 }

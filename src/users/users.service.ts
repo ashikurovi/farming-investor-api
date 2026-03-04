@@ -9,20 +9,32 @@ import { LoginUserDto } from './dto/login-user.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { UserEntity } from './entities/user.entity';
+import { InvestorTypeEntity } from '../investor-type/entities/investor-type.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(UserEntity)
     private readonly usersRepository: Repository<UserEntity>,
+    @InjectRepository(InvestorTypeEntity)
+    private readonly investorTypeRepository: Repository<InvestorTypeEntity>,
     private readonly jwtService: JwtService,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<UserEntity> {
-    const existing = await this.usersRepository.findOne({
+    let investorType: InvestorTypeEntity | null = null;
+    if (createUserDto.investorTypeId != null) {
+      investorType = await this.investorTypeRepository.findOne({
+        where: { id: createUserDto.investorTypeId },
+      });
+      if (!investorType) {
+        throw new BadRequestException('Investor type not found');
+      }
+    }
+    const existingUser = await this.usersRepository.findOne({
       where: { email: createUserDto.email },
     });
-    if (existing) {
+    if (existingUser) {
       throw new BadRequestException('Email already exists');
     }
 
@@ -30,6 +42,7 @@ export class UsersService {
     const user = this.usersRepository.create({
       ...createUserDto,
       password: hashedPassword,
+      investorType: investorType ?? undefined,
     });
     return this.usersRepository.save(user);
   }
@@ -52,8 +65,7 @@ export class UsersService {
 
     const queryBuilder = this.usersRepository
       .createQueryBuilder('user')
-      .leftJoinAndSelect('user.investments', 'investment')
-      .leftJoinAndSelect('investment.project', 'project');
+      .leftJoinAndSelect('user.investorType', 'investorType');
 
     if (search && search.trim() !== '') {
       const likeSearch = `%${search.trim()}%`;
@@ -86,7 +98,7 @@ export class UsersService {
   async findOne(id: number): Promise<UserEntity> {
     const user = await this.usersRepository.findOne({
       where: { id },
-      relations: ['investments', 'investments.project'],
+      relations: ['investorType'],
     });
     if (!user) {
       throw new NotFoundException(`User with id "${id}" not found`);

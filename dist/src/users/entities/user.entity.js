@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserEntity = exports.UserRole = void 0;
 const typeorm_1 = require("typeorm");
+const investor_type_entity_1 = require("../../investor-type/entities/investor-type.entity");
 var UserRole;
 (function (UserRole) {
     UserRole["ADMIN"] = "admin";
@@ -56,9 +57,17 @@ __decorate([
     __metadata("design:type", Boolean)
 ], UserEntity.prototype, "isBanned", void 0);
 __decorate([
-    (0, typeorm_1.OneToMany)('InvestmentEntity', 'user'),
-    __metadata("design:type", Array)
-], UserEntity.prototype, "investments", void 0);
+    (0, typeorm_1.Column)({ name: 'investor_type_id', nullable: true }),
+    __metadata("design:type", Number)
+], UserEntity.prototype, "investorTypeId", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => investor_type_entity_1.InvestorTypeEntity, {
+        nullable: true,
+        onDelete: 'SET NULL',
+    }),
+    (0, typeorm_1.JoinColumn)({ name: 'investor_type_id' }),
+    __metadata("design:type", investor_type_entity_1.InvestorTypeEntity)
+], UserEntity.prototype, "investorType", void 0);
 exports.UserEntity = UserEntity = __decorate([
     (0, typeorm_1.Entity)('tbl_users'),
     (0, typeorm_1.Index)(['role']),

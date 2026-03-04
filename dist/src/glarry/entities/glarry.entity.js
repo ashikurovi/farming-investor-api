@@ -20,13 +20,19 @@ __decorate([
     __metadata("design:type", Number)
 ], GlarryEntity.prototype, "id", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ name: 'project_id', nullable: true }),
+    __metadata("design:type", Number)
+], GlarryEntity.prototype, "projectId", void 0);
+__decorate([
     (0, typeorm_1.Column)({ name: 'photo_url' }),
     __metadata("design:type", String)
 ], GlarryEntity.prototype, "photoUrl", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => project_entity_1.ProjectEntity, { onDelete: 'CASCADE' }),
+    (0, typeorm_1.ManyToOne)(() => project_entity_1.Project, (project) => project.glarry, {
+        onDelete: 'CASCADE',
+    }),
     (0, typeorm_1.JoinColumn)({ name: 'project_id' }),
-    __metadata("design:type", project_entity_1.ProjectEntity)
+    __metadata("design:type", project_entity_1.Project)
 ], GlarryEntity.prototype, "project", void 0);
 exports.GlarryEntity = GlarryEntity = __decorate([
     (0, typeorm_1.Entity)('tbl_glarry')

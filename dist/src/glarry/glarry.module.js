@@ -12,13 +12,12 @@ const typeorm_1 = require("@nestjs/typeorm");
 const glarry_service_1 = require("./glarry.service");
 const glarry_controller_1 = require("./glarry.controller");
 const glarry_entity_1 = require("./entities/glarry.entity");
-const project_entity_1 = require("../projects/entities/project.entity");
 let GlarryModule = class GlarryModule {
 };
 exports.GlarryModule = GlarryModule;
 exports.GlarryModule = GlarryModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([glarry_entity_1.GlarryEntity, project_entity_1.ProjectEntity])],
+        imports: [typeorm_1.TypeOrmModule.forFeature([glarry_entity_1.GlarryEntity])],
         controllers: [glarry_controller_1.GlarryController],
         providers: [glarry_service_1.GlarryService],
     })
