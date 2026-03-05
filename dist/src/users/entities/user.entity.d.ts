@@ -11,6 +11,10 @@ export declare class UserEntity {
     password: string;
     location?: string;
     photoUrl?: string;
+    totalInvestment: number;
+    totalProfit: number;
+    balance: number;
+    totalCost: number;
     role: UserRole;
     isBanned: boolean;
     investorTypeId?: number;

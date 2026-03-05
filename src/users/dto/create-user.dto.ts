@@ -42,5 +42,25 @@ export class CreateUserDto {
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
+  totalInvestment?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  totalProfit?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  balance?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  totalCost?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
   investorTypeId?: number;
 }

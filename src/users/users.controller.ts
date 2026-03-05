@@ -37,7 +37,7 @@ export class UsersController {
   @Post()
   @UseInterceptors(FileInterceptor('photo'))
   async create(
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file: any,
     @Body() createUserDto: CreateUserDto,
   ) {
     if (file) {
@@ -158,7 +158,7 @@ export class UsersController {
   @UseInterceptors(FileInterceptor('photo'))
   async update(
     @Param('id') id: number,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file: any,
     @Body() updateUserDto: UpdateUserDto,
   ) {
     if (file) {
@@ -201,5 +201,46 @@ export class UsersController {
       statusCode: HttpStatus.OK,
       message: 'User removed successfully',
     }));
+  }
+
+  @Post(':id/withdraw-profit')
+  async withdrawProfit(@Param('id') id: string) {
+    const userId = Number(id);
+    const data = await this.usersService.withdrawProfit(userId);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Profit withdrawn successfully',
+      data,
+    };
+  }
+
+  @Post(':id/withdraw-all')
+  async withdrawAll(@Param('id') id: string) {
+    const userId = Number(id);
+    const data = await this.usersService.withdrawAll(userId);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Investment and profit withdrawn successfully',
+      data,
+    };
+  }
+  @Get(':id/investments')
+  async investments(
+    @Param('id') id: string,
+    @Query('page') page = '1',
+    @Query('limit') limit = '10',
+  ) {
+    const numericId = Number(id);
+    const pageNumber = Math.max(1, parseInt(page, 10) || 1);
+    const limitNumber = Math.max(1, parseInt(limit, 10) || 10);
+    const data = await this.usersService.investmentsWithStats(numericId, {
+      page: pageNumber,
+      limit: limitNumber,
+    });
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'User investments fetched successfully',
+      data,
+    };
   }
 }

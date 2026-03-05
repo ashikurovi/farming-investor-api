@@ -28,7 +28,9 @@ async function bootstrap() {
         app.useGlobalFilters(new all_exceptions_filter_1.AllExceptionsFilter());
         app.use((0, compression_1.default)());
         await app.init();
-        app.useStaticAssets((0, path_1.join)(process.cwd(), 'uploads'), { prefix: '/uploads/' });
+        app.useStaticAssets((0, path_1.join)(process.cwd(), 'uploads'), {
+            prefix: '/uploads/',
+        });
         cachedApp = app;
     }
     return cachedApp;
@@ -36,9 +38,22 @@ async function bootstrap() {
 if (!process.env.VERCEL) {
     async function startLocalServer() {
         const app = await bootstrap();
-        const port = 8000;
-        await app.listen(port);
-        console.log(`🚀 Server is running on: http://localhost:${port}`);
+        const basePort = Number(process.env.PORT) || 8000;
+        try {
+            await app.listen(basePort);
+            console.log(`Server is running on: http://localhost:${basePort}`);
+        }
+        catch (err) {
+            if (err?.code === 'EADDRINUSE') {
+                const altPort = basePort + 1;
+                console.warn(`Port ${basePort} in use. Starting on alternate port ${altPort}`);
+                await app.listen(altPort);
+                console.log(`Server is running on: http://localhost:${altPort}`);
+            }
+            else {
+                throw err;
+            }
+        }
     }
     startLocalServer();
 }

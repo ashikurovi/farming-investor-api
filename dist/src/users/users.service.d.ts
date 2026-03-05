@@ -7,11 +7,13 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { UserEntity } from './entities/user.entity';
 import { InvestorTypeEntity } from '../investor-type/entities/investor-type.entity';
+import { Investment } from '../investment/entities/investment.entity';
 export declare class UsersService {
     private readonly usersRepository;
     private readonly investorTypeRepository;
+    private readonly investmentRepository;
     private readonly jwtService;
-    constructor(usersRepository: Repository<UserEntity>, investorTypeRepository: Repository<InvestorTypeEntity>, jwtService: JwtService);
+    constructor(usersRepository: Repository<UserEntity>, investorTypeRepository: Repository<InvestorTypeEntity>, investmentRepository: Repository<Investment>, jwtService: JwtService);
     create(createUserDto: CreateUserDto): Promise<UserEntity>;
     findAll(options?: {
         page?: number;
@@ -38,4 +40,32 @@ export declare class UsersService {
     ban(id: number): Promise<UserEntity>;
     unban(id: number): Promise<UserEntity>;
     logout(): Promise<void>;
+    investmentsWithStats(userId: number, options?: {
+        page?: number;
+        limit?: number;
+    }): Promise<{
+        items: Investment[];
+        meta: {
+            total: number;
+            page: number;
+            limit: number;
+            pageCount: number;
+        };
+        stats: {
+            total: number;
+            count: number;
+            average: number;
+            latestDate?: string;
+            latestTime?: string;
+        };
+    }>;
+    withdrawProfit(userId: number): Promise<{
+        userId: number;
+        withdrawnProfit: number;
+    }>;
+    withdrawAll(userId: number): Promise<{
+        userId: number;
+        withdrawnProfit: number;
+        withdrawnInvestment: number;
+    }>;
 }

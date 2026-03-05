@@ -7,5 +7,9 @@ export declare class CreateUserDto {
     location?: string;
     role?: UserRole;
     photoUrl?: string;
+    totalInvestment?: number;
+    totalProfit?: number;
+    balance?: number;
+    totalCost?: number;
     investorTypeId?: number;
 }

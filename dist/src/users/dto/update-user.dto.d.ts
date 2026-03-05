@@ -7,5 +7,9 @@ export declare class UpdateUserDto {
     location?: string;
     role?: UserRole;
     photoUrl?: string;
+    totalInvestment?: number;
+    totalProfit?: number;
+    totalCost?: number;
+    balance?: number;
     investorTypeId?: number;
 }

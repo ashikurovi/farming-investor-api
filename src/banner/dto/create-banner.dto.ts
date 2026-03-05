@@ -1,5 +1,12 @@
 import { Type } from 'class-transformer';
-import { IsInt, IsNotEmpty, IsOptional, IsString, IsUrl, Min } from 'class-validator';
+import {
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUrl,
+  Min,
+} from 'class-validator';
 
 export class CreateBannerDto {
   @IsString()
@@ -19,4 +26,3 @@ export class CreateBannerDto {
   @Min(0)
   order: number;
 }
-

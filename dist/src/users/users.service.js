@@ -53,10 +53,12 @@ const jwt_1 = require("@nestjs/jwt");
 const bcrypt = __importStar(require("bcrypt"));
 const user_entity_1 = require("./entities/user.entity");
 const investor_type_entity_1 = require("../investor-type/entities/investor-type.entity");
+const investment_entity_1 = require("../investment/entities/investment.entity");
 let UsersService = class UsersService {
-    constructor(usersRepository, investorTypeRepository, jwtService) {
+    constructor(usersRepository, investorTypeRepository, investmentRepository, jwtService) {
         this.usersRepository = usersRepository;
         this.investorTypeRepository = investorTypeRepository;
+        this.investmentRepository = investmentRepository;
         this.jwtService = jwtService;
     }
     async create(createUserDto) {
@@ -84,7 +86,7 @@ let UsersService = class UsersService {
         return this.usersRepository.save(user);
     }
     async findAll(options = {}) {
-        const { page = 1, limit = 10, search, } = options;
+        const { page = 1, limit = 10, search } = options;
         const safeLimit = Math.min(Math.max(1, limit), 100);
         const queryBuilder = this.usersRepository
             .createQueryBuilder('user')
@@ -187,13 +189,90 @@ let UsersService = class UsersService {
     async logout() {
         return;
     }
+    async investmentsWithStats(userId, options = {}) {
+        const user = await this.findOne(userId);
+        const page = Math.max(1, options.page ?? 1);
+        const limit = Math.min(Math.max(1, options.limit ?? 10), 100);
+        const qb = this.investmentRepository
+            .createQueryBuilder('inv')
+            .where('inv.investorId = :userId', { userId })
+            .orderBy('inv.id', 'DESC')
+            .skip((page - 1) * limit)
+            .take(limit);
+        const [items, total] = await qb.getManyAndCount();
+        const pageCount = limit > 0 ? Math.ceil(total / limit) || 1 : 1;
+        const raw = await this.investmentRepository
+            .createQueryBuilder('inv')
+            .select('SUM(inv.amount)', 'total')
+            .addSelect('COUNT(*)', 'count')
+            .addSelect('AVG(inv.amount)', 'average')
+            .where('inv.investorId = :userId', { userId })
+            .getRawOne();
+        const latest = await this.investmentRepository
+            .createQueryBuilder('inv')
+            .where('inv.investorId = :userId', { userId })
+            .orderBy('inv.date', 'DESC')
+            .addOrderBy('inv.time', 'DESC')
+            .addOrderBy('inv.id', 'DESC')
+            .getOne();
+        return {
+            items,
+            meta: { total, page, limit, pageCount },
+            stats: {
+                total: raw?.total != null ? Number(raw.total) : 0,
+                count: raw?.count != null ? Number(raw.count) : 0,
+                average: raw?.average != null ? Number(raw.average) : 0,
+                latestDate: latest?.date,
+                latestTime: latest?.time,
+            },
+        };
+    }
+    async withdrawProfit(userId) {
+        return this.usersRepository.manager.transaction(async (manager) => {
+            const repo = manager.getRepository(user_entity_1.UserEntity);
+            const user = await repo.findOne({ where: { id: userId } });
+            if (!user) {
+                throw new common_1.NotFoundException(`User with id "${userId}" not found`);
+            }
+            const withdrawnProfit = Number(user.totalProfit || 0);
+            if (withdrawnProfit > 0) {
+                await repo
+                    .createQueryBuilder()
+                    .update(user_entity_1.UserEntity)
+                    .set({ totalProfit: 0 })
+                    .where('id = :id', { id: userId })
+                    .execute();
+            }
+            return { userId, withdrawnProfit };
+        });
+    }
+    async withdrawAll(userId) {
+        return this.usersRepository.manager.transaction(async (manager) => {
+            const repo = manager.getRepository(user_entity_1.UserEntity);
+            const user = await repo.findOne({ where: { id: userId } });
+            if (!user) {
+                throw new common_1.NotFoundException(`User with id "${userId}" not found`);
+            }
+            const withdrawnProfit = Number(user.totalProfit || 0);
+            const withdrawnInvestment = Number(user.totalInvestment || 0);
+            await repo
+                .createQueryBuilder()
+                .update(user_entity_1.UserEntity)
+                .set({ totalProfit: 0, totalInvestment: 0 })
+                .where('id = :id', { id: userId })
+                .execute();
+            return { userId, withdrawnProfit, withdrawnInvestment };
+        });
+    }
 };
 exports.UsersService = UsersService;
 exports.UsersService = UsersService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(user_entity_1.UserEntity)),
     __param(1, (0, typeorm_1.InjectRepository)(investor_type_entity_1.InvestorTypeEntity)),
+    __param(2, (0, typeorm_1.InjectRepository)(investment_entity_1.Investment)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository,
         typeorm_2.Repository,
         jwt_1.JwtService])
 ], UsersService);

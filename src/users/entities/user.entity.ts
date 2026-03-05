@@ -38,6 +38,18 @@ export class UserEntity {
   @Column({ nullable: true })
   photoUrl?: string;
 
+  @Column({ type: 'decimal', precision: 12, scale: 2, default: 0 })
+  totalInvestment: number;
+
+  @Column({ type: 'decimal', precision: 12, scale: 2, default: 0 })
+  totalProfit: number;
+
+  @Column({ type: 'decimal', precision: 12, scale: 2, default: 0 })
+  balance: number;
+
+  @Column({ type: 'decimal', precision: 12, scale: 2, default: 0 })
+  totalCost: number;
+
   @Column({ type: 'enum', enum: UserRole, default: UserRole.INVESTOR })
   role: UserRole;
 

@@ -30,7 +30,7 @@ export class GlarryController {
   @Post()
   @UseInterceptors(FileInterceptor('photo'))
   async create(
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file: any,
     @Body() createGlarryDto: CreateGlarryDto,
   ) {
     if (file) {
@@ -38,7 +38,9 @@ export class GlarryController {
         await this.blobStorageService.uploadGlarryPhoto(file);
     }
     if (!createGlarryDto.photoUrl) {
-      throw new BadRequestException('Either photo file or photoUrl is required');
+      throw new BadRequestException(
+        'Either photo file or photoUrl is required',
+      );
     }
     const glarry = await this.glarryService.create(createGlarryDto);
     return {
@@ -101,10 +103,12 @@ export class GlarryController {
   @UseInterceptors(FileInterceptor('photo'))
   async update(
     @Param('id') id: string,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file: any,
     @Body() updateGlarryDto: UpdateGlarryDto,
   ) {
-    const payload: UpdateGlarryDto & { photoUrl?: string } = { ...updateGlarryDto };
+    const payload: UpdateGlarryDto & { photoUrl?: string } = {
+      ...updateGlarryDto,
+    };
     if (file) {
       payload.photoUrl = await this.blobStorageService.uploadGlarryPhoto(file);
     }

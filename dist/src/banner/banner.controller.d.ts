@@ -1,5 +1,4 @@
 import { HttpStatus } from '@nestjs/common';
-import * as Express from 'express';
 import { BlobStorageService } from '../uploads/blob-storage.service';
 import { BannerService } from './banner.service';
 import { CreateBannerDto } from './dto/create-banner.dto';
@@ -8,7 +7,7 @@ export declare class BannerController {
     private readonly bannerService;
     private readonly blobStorageService;
     constructor(bannerService: BannerService, blobStorageService: BlobStorageService);
-    create(file: Express.Multer.File, createBannerDto: CreateBannerDto): Promise<{
+    create(file: any, createBannerDto: CreateBannerDto): Promise<{
         statusCode: HttpStatus;
         message: string;
         data: import("./entities/banner.entity").BannerEntity;
@@ -31,7 +30,7 @@ export declare class BannerController {
         message: string;
         data: import("./entities/banner.entity").BannerEntity;
     }>;
-    update(id: string, file: Express.Multer.File, updateBannerDto: UpdateBannerDto): Promise<{
+    update(id: string, file: any, updateBannerDto: UpdateBannerDto): Promise<{
         statusCode: HttpStatus;
         message: string;
         data: import("./entities/banner.entity").BannerEntity;

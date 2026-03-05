@@ -17,19 +17,17 @@ export class BannerService {
     return this.bannerRepository.save(banner);
   }
 
-  async findAll(options: {
-    page?: number;
-    limit?: number;
-    search?: string;
-  } = {}): Promise<{
+  async findAll(
+    options: {
+      page?: number;
+      limit?: number;
+      search?: string;
+    } = {},
+  ): Promise<{
     items: BannerEntity[];
     meta: { total: number; page: number; limit: number; pageCount: number };
   }> {
-    const {
-      page = 1,
-      limit = 10,
-      search,
-    } = options;
+    const { page = 1, limit = 10, search } = options;
 
     const queryBuilder = this.bannerRepository.createQueryBuilder('banner');
 
@@ -70,7 +68,10 @@ export class BannerService {
     return banner;
   }
 
-  async update(id: number, updateBannerDto: UpdateBannerDto): Promise<BannerEntity> {
+  async update(
+    id: number,
+    updateBannerDto: UpdateBannerDto,
+  ): Promise<BannerEntity> {
     const banner = await this.findOne(id);
     const merged = this.bannerRepository.merge(banner, updateBannerDto);
     return this.bannerRepository.save(merged);
@@ -83,4 +84,3 @@ export class BannerService {
     }
   }
 }
-

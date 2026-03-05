@@ -11,4 +11,3 @@ export interface VercelResponse extends ServerResponse {
   send(body: any): void;
   json(body: any): void;
 }
-

@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
@@ -10,6 +15,7 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { UserEntity } from './entities/user.entity';
 import { InvestorTypeEntity } from '../investor-type/entities/investor-type.entity';
+import { Investment } from '../investment/entities/investment.entity';
 
 @Injectable()
 export class UsersService {
@@ -18,6 +24,8 @@ export class UsersService {
     private readonly usersRepository: Repository<UserEntity>,
     @InjectRepository(InvestorTypeEntity)
     private readonly investorTypeRepository: Repository<InvestorTypeEntity>,
+    @InjectRepository(Investment)
+    private readonly investmentRepository: Repository<Investment>,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -47,19 +55,17 @@ export class UsersService {
     return this.usersRepository.save(user);
   }
 
-  async findAll(options: {
-    page?: number;
-    limit?: number;
-    search?: string;
-  } = {}): Promise<{
+  async findAll(
+    options: {
+      page?: number;
+      limit?: number;
+      search?: string;
+    } = {},
+  ): Promise<{
     items: UserEntity[];
     meta: { total: number; page: number; limit: number; pageCount: number };
   }> {
-    const {
-      page = 1,
-      limit = 10,
-      search,
-    } = options;
+    const { page = 1, limit = 10, search } = options;
 
     const safeLimit = Math.min(Math.max(1, limit), 100);
 
@@ -193,5 +199,111 @@ export class UsersService {
   // Kept for symmetry and future extensibility (e.g. token blacklist).
   async logout(): Promise<void> {
     return;
+  }
+
+  async investmentsWithStats(
+    userId: number,
+    options: { page?: number; limit?: number } = {},
+  ): Promise<{
+    items: Investment[];
+    meta: { total: number; page: number; limit: number; pageCount: number };
+    stats: {
+      total: number;
+      count: number;
+      average: number;
+      latestDate?: string;
+      latestTime?: string;
+    };
+  }> {
+    const user = await this.findOne(userId);
+    const page = Math.max(1, options.page ?? 1);
+    const limit = Math.min(Math.max(1, options.limit ?? 10), 100);
+
+    const qb = this.investmentRepository
+      .createQueryBuilder('inv')
+      .where('inv.investorId = :userId', { userId })
+      .orderBy('inv.id', 'DESC')
+      .skip((page - 1) * limit)
+      .take(limit);
+    const [items, total] = await qb.getManyAndCount();
+    const pageCount = limit > 0 ? Math.ceil(total / limit) || 1 : 1;
+
+    const raw = await this.investmentRepository
+      .createQueryBuilder('inv')
+      .select('SUM(inv.amount)', 'total')
+      .addSelect('COUNT(*)', 'count')
+      .addSelect('AVG(inv.amount)', 'average')
+      .where('inv.investorId = :userId', { userId })
+      .getRawOne<{
+        total: string | null;
+        count: string | null;
+        average: string | null;
+      }>();
+
+    const latest = await this.investmentRepository
+      .createQueryBuilder('inv')
+      .where('inv.investorId = :userId', { userId })
+      .orderBy('inv.date', 'DESC')
+      .addOrderBy('inv.time', 'DESC')
+      .addOrderBy('inv.id', 'DESC')
+      .getOne();
+
+    return {
+      items,
+      meta: { total, page, limit, pageCount },
+      stats: {
+        total: raw?.total != null ? Number(raw.total) : 0,
+        count: raw?.count != null ? Number(raw.count) : 0,
+        average: raw?.average != null ? Number(raw.average) : 0,
+        latestDate: latest?.date,
+        latestTime: latest?.time,
+      },
+    };
+  }
+
+  async withdrawProfit(userId: number): Promise<{
+    userId: number;
+    withdrawnProfit: number;
+  }> {
+    return this.usersRepository.manager.transaction(async (manager) => {
+      const repo = manager.getRepository(UserEntity);
+      const user = await repo.findOne({ where: { id: userId } });
+      if (!user) {
+        throw new NotFoundException(`User with id "${userId}" not found`);
+      }
+      const withdrawnProfit = Number(user.totalProfit || 0);
+      if (withdrawnProfit > 0) {
+        await repo
+          .createQueryBuilder()
+          .update(UserEntity)
+          .set({ totalProfit: 0 } as any)
+          .where('id = :id', { id: userId })
+          .execute();
+      }
+      return { userId, withdrawnProfit };
+    });
+  }
+
+  async withdrawAll(userId: number): Promise<{
+    userId: number;
+    withdrawnProfit: number;
+    withdrawnInvestment: number;
+  }> {
+    return this.usersRepository.manager.transaction(async (manager) => {
+      const repo = manager.getRepository(UserEntity);
+      const user = await repo.findOne({ where: { id: userId } });
+      if (!user) {
+        throw new NotFoundException(`User with id "${userId}" not found`);
+      }
+      const withdrawnProfit = Number(user.totalProfit || 0);
+      const withdrawnInvestment = Number(user.totalInvestment || 0);
+      await repo
+        .createQueryBuilder()
+        .update(UserEntity)
+        .set({ totalProfit: 0, totalInvestment: 0 } as any)
+        .where('id = :id', { id: userId })
+        .execute();
+      return { userId, withdrawnProfit, withdrawnInvestment };
+    });
   }
 }

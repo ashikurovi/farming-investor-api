@@ -29,7 +29,7 @@ export class BannerController {
   @Post()
   @UseInterceptors(FileInterceptor('photo'))
   async create(
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file: any,
     @Body() createBannerDto: CreateBannerDto,
   ) {
     if (file) {
@@ -80,15 +80,14 @@ export class BannerController {
   @UseInterceptors(FileInterceptor('photo'))
   async update(
     @Param('id') id: string,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file: any,
     @Body() updateBannerDto: UpdateBannerDto,
   ) {
     const payload: UpdateBannerDto & { photoUrl?: string } = {
       ...updateBannerDto,
     };
     if (file) {
-      payload.photoUrl =
-        await this.blobStorageService.uploadBannerPhoto(file);
+      payload.photoUrl = await this.blobStorageService.uploadBannerPhoto(file);
     }
     const banner = await this.bannerService.update(+id, payload);
     return {

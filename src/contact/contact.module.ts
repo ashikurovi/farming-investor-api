@@ -10,4 +10,3 @@ import { ContactMessage } from './entities/contact.entity';
   providers: [ContactService],
 })
 export class ContactModule {}
-

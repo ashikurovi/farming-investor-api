@@ -1,8 +1,4 @@
-import {
-  IsEmail,
-  IsOptional,
-  IsString,
-} from 'class-validator';
+import { IsEmail, IsOptional, IsString } from 'class-validator';
 
 export class UpdateContactDto {
   @IsOptional()
@@ -41,4 +37,3 @@ export class UpdateContactDto {
   @IsString()
   message?: string;
 }
-

@@ -4,7 +4,9 @@ import { CreateGlarryDto } from './dto/create-glarry.dto';
 import { UpdateGlarryDto } from './dto/update-glarry.dto';
 export type GlarryResponse = {
     id: number;
+    projectId: number;
     photoUrl: string;
+    projectName?: string;
 };
 export declare class GlarryService {
     private readonly glarryRepo;

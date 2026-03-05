@@ -1,5 +1,4 @@
 import { HttpStatus } from '@nestjs/common';
-import * as Express from 'express';
 import { BlobStorageService } from '../uploads/blob-storage.service';
 import { GlarryService } from './glarry.service';
 import { CreateGlarryDto } from './dto/create-glarry.dto';
@@ -8,7 +7,7 @@ export declare class GlarryController {
     private readonly glarryService;
     private readonly blobStorageService;
     constructor(glarryService: GlarryService, blobStorageService: BlobStorageService);
-    create(file: Express.Multer.File, createGlarryDto: CreateGlarryDto): Promise<{
+    create(file: any, createGlarryDto: CreateGlarryDto): Promise<{
         statusCode: HttpStatus;
         message: string;
         data: import("./glarry.service").GlarryResponse;
@@ -44,7 +43,7 @@ export declare class GlarryController {
         message: string;
         data: import("./glarry.service").GlarryResponse;
     }>;
-    update(id: string, file: Express.Multer.File, updateGlarryDto: UpdateGlarryDto): Promise<{
+    update(id: string, file: any, updateGlarryDto: UpdateGlarryDto): Promise<{
         statusCode: HttpStatus;
         message: string;
         data: import("./glarry.service").GlarryResponse;

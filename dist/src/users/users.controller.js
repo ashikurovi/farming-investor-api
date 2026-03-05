@@ -1,50 +1,16 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsersController = void 0;
 const common_1 = require("@nestjs/common");
@@ -56,8 +22,6 @@ const login_user_dto_1 = require("./dto/login-user.dto");
 const forgot_password_dto_1 = require("./dto/forgot-password.dto");
 const reset_password_dto_1 = require("./dto/reset-password.dto");
 const jwt_1 = require("@nestjs/jwt");
-const express_1 = require("express");
-const Express = __importStar(require("express"));
 const blob_storage_service_1 = require("../uploads/blob-storage.service");
 let UsersController = class UsersController {
     constructor(usersService, jwtService, blobStorageService) {
@@ -184,6 +148,38 @@ let UsersController = class UsersController {
             message: 'User removed successfully',
         }));
     }
+    async withdrawProfit(id) {
+        const userId = Number(id);
+        const data = await this.usersService.withdrawProfit(userId);
+        return {
+            statusCode: common_1.HttpStatus.OK,
+            message: 'Profit withdrawn successfully',
+            data,
+        };
+    }
+    async withdrawAll(id) {
+        const userId = Number(id);
+        const data = await this.usersService.withdrawAll(userId);
+        return {
+            statusCode: common_1.HttpStatus.OK,
+            message: 'Investment and profit withdrawn successfully',
+            data,
+        };
+    }
+    async investments(id, page = '1', limit = '10') {
+        const numericId = Number(id);
+        const pageNumber = Math.max(1, parseInt(page, 10) || 1);
+        const limitNumber = Math.max(1, parseInt(limit, 10) || 10);
+        const data = await this.usersService.investmentsWithStats(numericId, {
+            page: pageNumber,
+            limit: limitNumber,
+        });
+        return {
+            statusCode: common_1.HttpStatus.OK,
+            message: 'User investments fetched successfully',
+            data,
+        };
+    }
 };
 exports.UsersController = UsersController;
 __decorate([
@@ -192,7 +188,7 @@ __decorate([
     __param(0, (0, common_1.UploadedFile)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_b = typeof Express !== "undefined" && (_a = Express.Multer) !== void 0 && _a.File) === "function" ? _b : Object, create_user_dto_1.CreateUserDto]),
+    __metadata("design:paramtypes", [Object, create_user_dto_1.CreateUserDto]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "create", null);
 __decorate([
@@ -222,7 +218,7 @@ __decorate([
     (0, common_1.Get)('me'),
     __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_c = typeof express_1.Request !== "undefined" && express_1.Request) === "function" ? _c : Object]),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "me", null);
 __decorate([
@@ -253,7 +249,7 @@ __decorate([
     __param(1, (0, common_1.UploadedFile)()),
     __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, typeof (_e = typeof Express !== "undefined" && (_d = Express.Multer) !== void 0 && _d.File) === "function" ? _e : Object, update_user_dto_1.UpdateUserDto]),
+    __metadata("design:paramtypes", [Number, Object, update_user_dto_1.UpdateUserDto]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "update", null);
 __decorate([
@@ -278,6 +274,29 @@ __decorate([
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", void 0)
 ], UsersController.prototype, "remove", null);
+__decorate([
+    (0, common_1.Post)(':id/withdraw-profit'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "withdrawProfit", null);
+__decorate([
+    (0, common_1.Post)(':id/withdraw-all'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "withdrawAll", null);
+__decorate([
+    (0, common_1.Get)(':id/investments'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Query)('page')),
+    __param(2, (0, common_1.Query)('limit')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object, Object]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "investments", null);
 exports.UsersController = UsersController = __decorate([
     (0, common_1.Controller)('users'),
     __metadata("design:paramtypes", [users_service_1.UsersService,

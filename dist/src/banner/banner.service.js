@@ -26,7 +26,7 @@ let BannerService = class BannerService {
         return this.bannerRepository.save(banner);
     }
     async findAll(options = {}) {
-        const { page = 1, limit = 10, search, } = options;
+        const { page = 1, limit = 10, search } = options;
         const queryBuilder = this.bannerRepository.createQueryBuilder('banner');
         if (search && search.trim() !== '') {
             const likeSearch = `%${search.trim()}%`;

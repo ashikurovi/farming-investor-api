@@ -20,6 +20,8 @@ const glarry_module_1 = require("./glarry/glarry.module");
 const projects_module_1 = require("./projects/projects.module");
 const investor_type_module_1 = require("./investor-type/investor-type.module");
 const contact_module_1 = require("./contact/contact.module");
+const daily_report_module_1 = require("./daily-report/daily-report.module");
+const investment_module_1 = require("./investment/investment.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -52,6 +54,8 @@ exports.AppModule = AppModule = __decorate([
             projects_module_1.ProjectsModule,
             investor_type_module_1.InvestorTypeModule,
             contact_module_1.ContactModule,
+            daily_report_module_1.DailyReportModule,
+            investment_module_1.InvestmentModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

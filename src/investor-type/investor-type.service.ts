@@ -52,7 +52,8 @@ export class InvestorTypeService {
     if (!entity) {
       throw new NotFoundException(`InvestorType with id "${id}" not found`);
     }
-    if (updateInvestorTypeDto.type != null) entity.type = updateInvestorTypeDto.type;
+    if (updateInvestorTypeDto.type != null)
+      entity.type = updateInvestorTypeDto.type;
     if (updateInvestorTypeDto.percentage != null)
       entity.percentage = updateInvestorTypeDto.percentage;
     const saved = await this.investorTypeRepo.save(entity);

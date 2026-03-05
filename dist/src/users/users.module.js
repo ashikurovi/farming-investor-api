@@ -13,12 +13,15 @@ const users_service_1 = require("./users.service");
 const users_controller_1 = require("./users.controller");
 const user_entity_1 = require("./entities/user.entity");
 const investor_type_entity_1 = require("../investor-type/entities/investor-type.entity");
+const investment_entity_1 = require("../investment/entities/investment.entity");
 let UsersModule = class UsersModule {
 };
 exports.UsersModule = UsersModule;
 exports.UsersModule = UsersModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([user_entity_1.UserEntity, investor_type_entity_1.InvestorTypeEntity])],
+        imports: [
+            typeorm_1.TypeOrmModule.forFeature([user_entity_1.UserEntity, investor_type_entity_1.InvestorTypeEntity, investment_entity_1.Investment]),
+        ],
         controllers: [users_controller_1.UsersController],
         providers: [users_service_1.UsersService],
         exports: [users_service_1.UsersService, typeorm_1.TypeOrmModule],

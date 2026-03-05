@@ -52,7 +52,10 @@ export class InvestorTypeController {
     @Param('id') id: string,
     @Body() updateInvestorTypeDto: UpdateInvestorTypeDto,
   ) {
-    const data = await this.investorTypeService.update(+id, updateInvestorTypeDto);
+    const data = await this.investorTypeService.update(
+      +id,
+      updateInvestorTypeDto,
+    );
     return {
       statusCode: HttpStatus.OK,
       message: 'Investor type updated successfully',

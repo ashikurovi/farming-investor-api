@@ -1,9 +1,8 @@
-import * as Express from 'express';
 export declare class BlobStorageService {
     private readonly logger;
-    uploadUserPhoto(file: Express.Multer.File): Promise<string>;
-    uploadBannerPhoto(file: Express.Multer.File): Promise<string>;
-    uploadProjectImage(file: Express.Multer.File): Promise<string>;
-    uploadGlarryPhoto(file: Express.Multer.File): Promise<string>;
+    uploadUserPhoto(file: any): Promise<string>;
+    uploadBannerPhoto(file: any): Promise<string>;
+    uploadProjectImage(file: any): Promise<string>;
+    uploadGlarryPhoto(file: any): Promise<string>;
     private upload;
 }

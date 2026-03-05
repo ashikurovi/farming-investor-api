@@ -11,6 +11,8 @@ import { GlarryModule } from './glarry/glarry.module';
 import { ProjectsModule } from './projects/projects.module';
 import { InvestorTypeModule } from './investor-type/investor-type.module';
 import { ContactModule } from './contact/contact.module';
+import { DailyReportModule } from './daily-report/daily-report.module';
+import { InvestmentModule } from './investment/investment.module';
 
 @Module({
   imports: [
@@ -23,7 +25,6 @@ import { ContactModule } from './contact/contact.module';
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
- 
         return {
           type: 'postgres',
           url: process.env.DATABASE_URL,
@@ -33,7 +34,6 @@ import { ContactModule } from './contact/contact.module';
           ssl: {
             rejectUnauthorized: false,
           },
-         
         };
       },
     }),
@@ -46,6 +46,8 @@ import { ContactModule } from './contact/contact.module';
     ProjectsModule,
     InvestorTypeModule,
     ContactModule,
+    DailyReportModule,
+    InvestmentModule,
   ],
 
   controllers: [AppController],

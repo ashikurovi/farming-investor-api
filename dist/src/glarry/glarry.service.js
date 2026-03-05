@@ -23,6 +23,7 @@ let GlarryService = class GlarryService {
     }
     async create(createGlarryDto) {
         const glarry = this.glarryRepo.create({
+            projectId: createGlarryDto.projectId,
             photoUrl: createGlarryDto.photoUrl,
         });
         const saved = await this.glarryRepo.save(glarry);
@@ -33,9 +34,13 @@ let GlarryService = class GlarryService {
         const safeLimit = Math.min(Math.max(1, limit), 100);
         const qb = this.glarryRepo
             .createQueryBuilder('glarry')
+            .leftJoinAndSelect('glarry.project', 'project')
             .orderBy('glarry.id', 'DESC')
             .skip((page - 1) * safeLimit)
             .take(safeLimit);
+        if (projectId != null) {
+            qb.where('glarry.project_id = :projectId', { projectId });
+        }
         const [list, total] = await qb.getManyAndCount();
         const pageCount = safeLimit > 0 ? Math.ceil(total / safeLimit) || 1 : 1;
         return {
@@ -48,9 +53,11 @@ let GlarryService = class GlarryService {
         const safeLimit = Math.min(Math.max(1, limit), 100);
         const qb = this.glarryRepo
             .createQueryBuilder('glarry')
+            .leftJoinAndSelect('glarry.project', 'project')
             .orderBy('glarry.id', 'DESC')
             .skip((page - 1) * safeLimit)
-            .take(safeLimit);
+            .take(safeLimit)
+            .where('glarry.project_id = :projectId', { projectId });
         const [list, total] = await qb.getManyAndCount();
         const pageCount = safeLimit > 0 ? Math.ceil(total / safeLimit) || 1 : 1;
         return {
@@ -61,6 +68,7 @@ let GlarryService = class GlarryService {
     async findOne(id) {
         const glarry = await this.glarryRepo.findOne({
             where: { id },
+            relations: ['project'],
         });
         if (!glarry) {
             throw new common_1.NotFoundException(`Glarry with id "${id}" not found`);
@@ -71,6 +79,9 @@ let GlarryService = class GlarryService {
         const glarry = await this.glarryRepo.findOne({ where: { id } });
         if (!glarry) {
             throw new common_1.NotFoundException(`Glarry with id "${id}" not found`);
+        }
+        if (updateGlarryDto.projectId != null) {
+            glarry.projectId = updateGlarryDto.projectId;
         }
         if (updateGlarryDto.photoUrl != null)
             glarry.photoUrl = updateGlarryDto.photoUrl;
@@ -86,7 +97,9 @@ let GlarryService = class GlarryService {
     toResponse(g) {
         return {
             id: g.id,
+            projectId: g.projectId,
             photoUrl: g.photoUrl,
+            projectName: g.project?.name,
         };
     }
 };

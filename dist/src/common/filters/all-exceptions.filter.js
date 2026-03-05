@@ -19,7 +19,7 @@ let AllExceptionsFilter = class AllExceptionsFilter {
         const exceptionResponse = exception instanceof common_1.HttpException ? exception.getResponse() : null;
         const message = typeof exceptionResponse === 'string'
             ? exceptionResponse
-            : exceptionResponse?.message ?? 'Internal server error';
+            : (exceptionResponse?.message ?? 'Internal server error');
         response.status(status).json({
             statusCode: status,
             message,

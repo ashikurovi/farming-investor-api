@@ -19,4 +19,3 @@ export class BannerEntity {
   @Column({ name: 'display_order', type: 'int' })
   order: number;
 }
-

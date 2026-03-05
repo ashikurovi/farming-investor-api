@@ -7,7 +7,9 @@ import { UpdateGlarryDto } from './dto/update-glarry.dto';
 
 export type GlarryResponse = {
   id: number;
+  projectId: number;
   photoUrl: string;
+  projectName?: string;
 };
 
 @Injectable()
@@ -19,17 +21,20 @@ export class GlarryService {
 
   async create(createGlarryDto: CreateGlarryDto): Promise<GlarryResponse> {
     const glarry = this.glarryRepo.create({
+      projectId: createGlarryDto.projectId,
       photoUrl: createGlarryDto.photoUrl,
     });
     const saved = await this.glarryRepo.save(glarry);
     return this.findOne(saved.id);
   }
 
-  async findAll(options: {
-    page?: number;
-    limit?: number;
-    projectId?: number;
-  } = {}): Promise<{
+  async findAll(
+    options: {
+      page?: number;
+      limit?: number;
+      projectId?: number;
+    } = {},
+  ): Promise<{
     items: GlarryResponse[];
     meta: { total: number; page: number; limit: number; pageCount: number };
   }> {
@@ -38,9 +43,13 @@ export class GlarryService {
 
     const qb = this.glarryRepo
       .createQueryBuilder('glarry')
+      .leftJoinAndSelect('glarry.project', 'project')
       .orderBy('glarry.id', 'DESC')
       .skip((page - 1) * safeLimit)
       .take(safeLimit);
+    if (projectId != null) {
+      qb.where('glarry.project_id = :projectId', { projectId });
+    }
 
     const [list, total] = await qb.getManyAndCount();
     const pageCount = safeLimit > 0 ? Math.ceil(total / safeLimit) || 1 : 1;
@@ -63,9 +72,11 @@ export class GlarryService {
 
     const qb = this.glarryRepo
       .createQueryBuilder('glarry')
+      .leftJoinAndSelect('glarry.project', 'project')
       .orderBy('glarry.id', 'DESC')
       .skip((page - 1) * safeLimit)
-      .take(safeLimit);
+      .take(safeLimit)
+      .where('glarry.project_id = :projectId', { projectId });
 
     const [list, total] = await qb.getManyAndCount();
     const pageCount = safeLimit > 0 ? Math.ceil(total / safeLimit) || 1 : 1;
@@ -79,6 +90,7 @@ export class GlarryService {
   async findOne(id: number): Promise<GlarryResponse> {
     const glarry = await this.glarryRepo.findOne({
       where: { id },
+      relations: ['project'],
     });
     if (!glarry) {
       throw new NotFoundException(`Glarry with id "${id}" not found`);
@@ -86,12 +98,19 @@ export class GlarryService {
     return this.toResponse(glarry);
   }
 
-  async update(id: number, updateGlarryDto: UpdateGlarryDto): Promise<GlarryResponse> {
+  async update(
+    id: number,
+    updateGlarryDto: UpdateGlarryDto,
+  ): Promise<GlarryResponse> {
     const glarry = await this.glarryRepo.findOne({ where: { id } });
     if (!glarry) {
       throw new NotFoundException(`Glarry with id "${id}" not found`);
     }
-    if (updateGlarryDto.photoUrl != null) glarry.photoUrl = updateGlarryDto.photoUrl;
+    if (updateGlarryDto.projectId != null) {
+      glarry.projectId = updateGlarryDto.projectId;
+    }
+    if (updateGlarryDto.photoUrl != null)
+      glarry.photoUrl = updateGlarryDto.photoUrl;
     const saved = await this.glarryRepo.save(glarry);
     return this.toResponse(saved);
   }
@@ -106,7 +125,9 @@ export class GlarryService {
   private toResponse(g: GlarryEntity): GlarryResponse {
     return {
       id: g.id,
+      projectId: g.projectId,
       photoUrl: g.photoUrl,
+      projectName: g.project?.name,
     };
   }
 }
