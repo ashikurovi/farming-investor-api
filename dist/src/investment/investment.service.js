@@ -55,6 +55,21 @@ let InvestmentService = class InvestmentService {
     async findAll() {
         return this.investmentRepo.find({ order: { id: 'DESC' } });
     }
+    async stats() {
+        const row = await this.investmentRepo
+            .createQueryBuilder('inv')
+            .select('COALESCE(SUM(inv.amount), 0)', 'total')
+            .getRawOne();
+        const totalInvestmentCollect = Number(row?.total ?? 0);
+        const totalInvestorCount = await this.userRepo.count({
+            where: { role: user_entity_1.UserRole.INVESTOR },
+        });
+        const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+        const newInvestorCount = await this.userRepo.count({
+            where: { role: user_entity_1.UserRole.INVESTOR, createdAt: (0, typeorm_2.MoreThan)(thirtyDaysAgo) },
+        });
+        return { totalInvestmentCollect, totalInvestorCount, newInvestorCount };
+    }
     async findRecent(limit = 5) {
         const safeLimit = Math.min(Math.max(1, limit), 50);
         const list = await this.investmentRepo

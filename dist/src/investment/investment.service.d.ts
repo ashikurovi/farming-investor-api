@@ -9,6 +9,11 @@ export declare class InvestmentService {
     constructor(investmentRepo: Repository<Investment>, userRepo: Repository<UserEntity>);
     create(createInvestmentDto: CreateInvestmentDto): Promise<Investment>;
     findAll(): Promise<Investment[]>;
+    stats(): Promise<{
+        totalInvestmentCollect: number;
+        totalInvestorCount: number;
+        newInvestorCount: number;
+    }>;
     findRecent(limit?: number): Promise<Array<{
         id: number;
         investorId: number;

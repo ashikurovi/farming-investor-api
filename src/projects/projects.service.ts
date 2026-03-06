@@ -129,7 +129,10 @@ export class ProjectsService {
       .addSelect('COALESCE(SUM(p.totalInvestment), 0)', 'totalInvestment')
       .addSelect('COALESCE(SUM(p.totalSell), 0)', 'totalSell')
       .addSelect('COALESCE(SUM(p.totalCost), 0)', 'totalCost')
-      .addSelect('COALESCE(SUM(p.totalSell - p.totalCost), 0)', 'totalProfit')
+      .addSelect(
+        'COALESCE(SUM(CASE WHEN (p.totalCost - p.totalSell) > 0 THEN (p.totalCost - p.totalSell) ELSE 0 END), 0)',
+        'totalProfit',
+      )
       .getRawOne<{
         count: string | number;
         totalInvestment: string | number;
@@ -143,8 +146,7 @@ export class ProjectsService {
       raw?.totalInvestment != null ? Number(raw.totalInvestment) : 0;
     const totalSell = raw?.totalSell != null ? Number(raw.totalSell) : 0;
     const totalCost = raw?.totalCost != null ? Number(raw.totalCost) : 0;
-    const totalProfit =
-      raw?.totalProfit != null ? Number(raw.totalProfit) : 0;
+    const totalProfit = raw?.totalProfit != null ? Number(raw.totalProfit) : 0;
 
     const activeInvestors = await this.usersRepo.count({
       where: { role: UserRole.INVESTOR, isBanned: false },

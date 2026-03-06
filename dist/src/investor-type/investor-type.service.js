@@ -17,6 +17,8 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const investor_type_entity_1 = require("./entities/investor-type.entity");
+const project_entity_1 = require("../projects/entities/project.entity");
+const user_entity_1 = require("../users/entities/user.entity");
 let InvestorTypeService = class InvestorTypeService {
     constructor(investorTypeRepo) {
         this.investorTypeRepo = investorTypeRepo;
@@ -52,6 +54,49 @@ let InvestorTypeService = class InvestorTypeService {
         if (updateInvestorTypeDto.percentage != null)
             entity.percentage = updateInvestorTypeDto.percentage;
         const saved = await this.investorTypeRepo.save(entity);
+        await this.investorTypeRepo.manager.transaction(async (manager) => {
+            const projRepo = manager.getRepository(project_entity_1.Project);
+            const usersRepo = manager.getRepository(user_entity_1.UserEntity);
+            const raw = await projRepo
+                .createQueryBuilder('p')
+                .select('COALESCE(SUM(p.distributedProfit), 0)', 'pool')
+                .getRawOne();
+            const pool = raw?.pool != null ? Number(raw.pool) : 0;
+            const users = await usersRepo
+                .createQueryBuilder('u')
+                .leftJoinAndSelect('u.investorType', 'investorType')
+                .where('u.role = :role', { role: user_entity_1.UserRole.INVESTOR })
+                .andWhere('u.isBanned = :banned', { banned: false })
+                .getMany();
+            await usersRepo
+                .createQueryBuilder()
+                .update(user_entity_1.UserEntity)
+                .set({ totalProfit: 0 })
+                .where('role = :role', { role: user_entity_1.UserRole.INVESTOR })
+                .andWhere('isBanned = :banned', { banned: false })
+                .execute();
+            const totalInvest = users.reduce((sum, u) => sum + Number(u.totalInvestment || 0), 0);
+            if (pool > 0 && users.length > 0 && totalInvest > 0) {
+                for (const u of users) {
+                    const share = Number(u.totalInvestment || 0) / totalInvest;
+                    const investorTypePercent = u.investorType && u.investorType.percentage != null
+                        ? Number(u.investorType.percentage)
+                        : 100;
+                    const pct = investorTypePercent / 100;
+                    const final = pool * share * pct;
+                    if (final !== 0) {
+                        await usersRepo
+                            .createQueryBuilder()
+                            .update(user_entity_1.UserEntity)
+                            .set({
+                            totalProfit: () => `"totalProfit" + ${final}`,
+                        })
+                            .where('id = :id', { id: u.id })
+                            .execute();
+                    }
+                }
+            }
+        });
         return this.toResponse(saved);
     }
     async remove(id) {

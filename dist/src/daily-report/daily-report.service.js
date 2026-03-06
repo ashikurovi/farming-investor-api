@@ -67,7 +67,9 @@ let DailyReportService = class DailyReportService {
             await projRepo
                 .createQueryBuilder()
                 .update(project_entity_1.Project)
-                .set({ totalProfit: () => '"totalCost" - "totalSell"' })
+                .set({
+                totalProfit: () => 'CASE WHEN ("totalCost" - "totalSell") > 0 THEN ("totalCost" - "totalSell") ELSE 0 END',
+            })
                 .where('id = :id', { id: dto.projectId })
                 .execute();
             const updatedProject = await projRepo.findOne({

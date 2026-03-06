@@ -6,21 +6,27 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
   HttpStatus,
   HttpCode,
   UploadedFile,
   UseInterceptors,
+  UseGuards,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { InvestmentService } from './investment.service';
 import { CreateInvestmentDto } from './dto/create-investment.dto';
 import { UpdateInvestmentDto } from './dto/update-investment.dto';
 import { BlobStorageService } from '../uploads/blob-storage.service';
+import { UsersService } from '../users/users.service';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { CurrentUser } from '../common/decorators/user.decorator';
 
-@Controller('investment')
+@Controller(['investment', 'investments'])
 export class InvestmentController {
   constructor(
     private readonly investmentService: InvestmentService,
+    private readonly usersService: UsersService,
     private readonly blobStorageService: BlobStorageService,
   ) {}
 
@@ -48,6 +54,36 @@ export class InvestmentController {
     return {
       statusCode: HttpStatus.OK,
       message: 'Investments fetched successfully',
+      data,
+    };
+  }
+
+  @Get('my')
+  @UseGuards(JwtAuthGuard)
+  async my(
+    @CurrentUser('sub') userId: number,
+    @Query('page') page = '1',
+    @Query('limit') limit = '10',
+  ) {
+    const pageNumber = Math.max(1, parseInt(page, 10) || 1);
+    const limitNumber = Math.max(1, parseInt(limit, 10) || 10);
+    const data = await this.usersService.investmentsWithStats(userId, {
+      page: pageNumber,
+      limit: limitNumber,
+    });
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'My investments fetched successfully',
+      data,
+    };
+  }
+
+  @Get('stats')
+  async getStats() {
+    const data = await this.investmentService.stats();
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Investment stats fetched successfully',
       data,
     };
   }

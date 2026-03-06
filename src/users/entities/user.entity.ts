@@ -4,6 +4,8 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
+  CreateDateColumn,
+  UpdateDateColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { InvestorTypeEntity } from '../../investor-type/entities/investor-type.entity';
@@ -65,4 +67,10 @@ export class UserEntity {
   })
   @JoinColumn({ name: 'investor_type_id' })
   investorType?: InvestorTypeEntity;
+
+  @CreateDateColumn({ type: 'timestamp with time zone' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamp with time zone' })
+  updatedAt: Date;
 }

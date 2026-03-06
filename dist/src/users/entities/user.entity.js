@@ -84,6 +84,14 @@ __decorate([
     (0, typeorm_1.JoinColumn)({ name: 'investor_type_id' }),
     __metadata("design:type", investor_type_entity_1.InvestorTypeEntity)
 ], UserEntity.prototype, "investorType", void 0);
+__decorate([
+    (0, typeorm_1.CreateDateColumn)({ type: 'timestamp with time zone' }),
+    __metadata("design:type", Date)
+], UserEntity.prototype, "createdAt", void 0);
+__decorate([
+    (0, typeorm_1.UpdateDateColumn)({ type: 'timestamp with time zone' }),
+    __metadata("design:type", Date)
+], UserEntity.prototype, "updatedAt", void 0);
 exports.UserEntity = UserEntity = __decorate([
     (0, typeorm_1.Entity)('tbl_users'),
     (0, typeorm_1.Index)(['role']),

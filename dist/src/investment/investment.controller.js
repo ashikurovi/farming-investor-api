@@ -19,9 +19,13 @@ const investment_service_1 = require("./investment.service");
 const create_investment_dto_1 = require("./dto/create-investment.dto");
 const update_investment_dto_1 = require("./dto/update-investment.dto");
 const blob_storage_service_1 = require("../uploads/blob-storage.service");
+const users_service_1 = require("../users/users.service");
+const jwt_auth_guard_1 = require("../common/guards/jwt-auth.guard");
+const user_decorator_1 = require("../common/decorators/user.decorator");
 let InvestmentController = class InvestmentController {
-    constructor(investmentService, blobStorageService) {
+    constructor(investmentService, usersService, blobStorageService) {
         this.investmentService = investmentService;
+        this.usersService = usersService;
         this.blobStorageService = blobStorageService;
     }
     async create(file, createInvestmentDto) {
@@ -41,6 +45,27 @@ let InvestmentController = class InvestmentController {
         return {
             statusCode: common_1.HttpStatus.OK,
             message: 'Investments fetched successfully',
+            data,
+        };
+    }
+    async my(userId, page = '1', limit = '10') {
+        const pageNumber = Math.max(1, parseInt(page, 10) || 1);
+        const limitNumber = Math.max(1, parseInt(limit, 10) || 10);
+        const data = await this.usersService.investmentsWithStats(userId, {
+            page: pageNumber,
+            limit: limitNumber,
+        });
+        return {
+            statusCode: common_1.HttpStatus.OK,
+            message: 'My investments fetched successfully',
+            data,
+        };
+    }
+    async getStats() {
+        const data = await this.investmentService.stats();
+        return {
+            statusCode: common_1.HttpStatus.OK,
+            message: 'Investment stats fetched successfully',
             data,
         };
     }
@@ -97,6 +122,22 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], InvestmentController.prototype, "findAll", null);
 __decorate([
+    (0, common_1.Get)('my'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    __param(0, (0, user_decorator_1.CurrentUser)('sub')),
+    __param(1, (0, common_1.Query)('page')),
+    __param(2, (0, common_1.Query)('limit')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Object, Object]),
+    __metadata("design:returntype", Promise)
+], InvestmentController.prototype, "my", null);
+__decorate([
+    (0, common_1.Get)('stats'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], InvestmentController.prototype, "getStats", null);
+__decorate([
     (0, common_1.Get)('recent'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
@@ -128,8 +169,9 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], InvestmentController.prototype, "remove", null);
 exports.InvestmentController = InvestmentController = __decorate([
-    (0, common_1.Controller)('investment'),
+    (0, common_1.Controller)(['investment', 'investments']),
     __metadata("design:paramtypes", [investment_service_1.InvestmentService,
+        users_service_1.UsersService,
         blob_storage_service_1.BlobStorageService])
 ], InvestmentController);
 //# sourceMappingURL=investment.controller.js.map

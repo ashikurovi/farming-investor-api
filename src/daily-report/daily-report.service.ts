@@ -79,7 +79,10 @@ export class DailyReportService {
       await projRepo
         .createQueryBuilder()
         .update(Project)
-        .set({ totalProfit: () => '"totalCost" - "totalSell"' } as any)
+        .set({
+          totalProfit: () =>
+            'CASE WHEN ("totalCost" - "totalSell") > 0 THEN ("totalCost" - "totalSell") ELSE 0 END',
+        } as any)
         .where('id = :id', { id: dto.projectId })
         .execute();
 

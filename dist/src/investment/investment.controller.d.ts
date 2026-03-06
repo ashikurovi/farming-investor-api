@@ -3,10 +3,12 @@ import { InvestmentService } from './investment.service';
 import { CreateInvestmentDto } from './dto/create-investment.dto';
 import { UpdateInvestmentDto } from './dto/update-investment.dto';
 import { BlobStorageService } from '../uploads/blob-storage.service';
+import { UsersService } from '../users/users.service';
 export declare class InvestmentController {
     private readonly investmentService;
+    private readonly usersService;
     private readonly blobStorageService;
-    constructor(investmentService: InvestmentService, blobStorageService: BlobStorageService);
+    constructor(investmentService: InvestmentService, usersService: UsersService, blobStorageService: BlobStorageService);
     create(file: any, createInvestmentDto: CreateInvestmentDto): Promise<{
         statusCode: HttpStatus;
         message: string;
@@ -16,6 +18,35 @@ export declare class InvestmentController {
         statusCode: HttpStatus;
         message: string;
         data: import("./entities/investment.entity").Investment[];
+    }>;
+    my(userId: number, page?: string, limit?: string): Promise<{
+        statusCode: HttpStatus;
+        message: string;
+        data: {
+            items: import("./entities/investment.entity").Investment[];
+            meta: {
+                total: number;
+                page: number;
+                limit: number;
+                pageCount: number;
+            };
+            stats: {
+                total: number;
+                count: number;
+                average: number;
+                latestDate?: string;
+                latestTime?: string;
+            };
+        };
+    }>;
+    getStats(): Promise<{
+        statusCode: HttpStatus;
+        message: string;
+        data: {
+            totalInvestmentCollect: number;
+            totalInvestorCount: number;
+            newInvestorCount: number;
+        };
     }>;
     recent(): Promise<{
         statusCode: HttpStatus;

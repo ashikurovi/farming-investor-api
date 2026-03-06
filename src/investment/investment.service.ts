@@ -4,11 +4,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { MoreThan, Repository } from 'typeorm';
 import { CreateInvestmentDto } from './dto/create-investment.dto';
 import { UpdateInvestmentDto } from './dto/update-investment.dto';
 import { Investment } from './entities/investment.entity';
-import { UserEntity } from '../users/entities/user.entity';
+import { UserEntity, UserRole } from '../users/entities/user.entity';
 
 @Injectable()
 export class InvestmentService {
@@ -60,6 +60,26 @@ export class InvestmentService {
 
   async findAll() {
     return this.investmentRepo.find({ order: { id: 'DESC' } });
+  }
+
+  async stats(): Promise<{
+    totalInvestmentCollect: number;
+    totalInvestorCount: number;
+    newInvestorCount: number;
+  }> {
+    const row = await this.investmentRepo
+      .createQueryBuilder('inv')
+      .select('COALESCE(SUM(inv.amount), 0)', 'total')
+      .getRawOne<{ total: string | number }>();
+    const totalInvestmentCollect = Number(row?.total ?? 0);
+    const totalInvestorCount = await this.userRepo.count({
+      where: { role: UserRole.INVESTOR },
+    });
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const newInvestorCount = await this.userRepo.count({
+      where: { role: UserRole.INVESTOR, createdAt: MoreThan(thirtyDaysAgo) },
+    });
+    return { totalInvestmentCollect, totalInvestorCount, newInvestorCount };
   }
 
   async findRecent(limit = 5): Promise<

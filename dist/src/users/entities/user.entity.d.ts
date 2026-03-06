@@ -19,4 +19,6 @@ export declare class UserEntity {
     isBanned: boolean;
     investorTypeId?: number;
     investorType?: InvestorTypeEntity;
+    createdAt: Date;
+    updatedAt: Date;
 }
