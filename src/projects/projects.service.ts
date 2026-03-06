@@ -59,7 +59,19 @@ export class ProjectsService {
       const beforeDistributed = Number(project.distributedProfit || 0);
       const merged = projRepo.merge(project, updateProjectDto);
       const saved = await projRepo.save(merged);
-      const currentProfit = Number(saved.totalProfit || 0);
+
+      await projRepo
+        .createQueryBuilder()
+        .update(Project)
+        .set({
+          totalProfit: () =>
+            'CASE WHEN ("totalCost" - "totalSell") > 0 THEN ("totalCost" - "totalSell") ELSE 0 END',
+        } as any)
+        .where('id = :id', { id })
+        .execute();
+
+      const refreshed = await projRepo.findOne({ where: { id } });
+      const currentProfit = Number(refreshed?.totalProfit || 0);
       const delta = currentProfit - beforeDistributed;
       if (delta > 0) {
         const users = await usersRepo
@@ -103,7 +115,7 @@ export class ProjectsService {
             .execute();
         }
       }
-      return saved;
+      return refreshed!;
     });
   }
 
