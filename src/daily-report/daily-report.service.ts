@@ -55,17 +55,26 @@ export class DailyReportService {
         const eligibleCount = eligibleUsers.length;
         if (eligibleCount > 0) {
           const perUser = dailyCostNum / eligibleCount;
-          await this.usersRepo
-            .createQueryBuilder()
-            .update(UserEntity)
-            .set({
-              balance: () => `balance - ${perUser}`,
-              totalCost: () => `totalCost + ${perUser}`,
-            })
-            .where('role = :role', { role: UserRole.INVESTOR })
-            .andWhere('isBanned = :banned', { banned: false })
-            .andWhere('balance > 0')
-            .execute();
+          for (const u of eligibleUsers) {
+            const currentBalance = Number(u.balance || 0);
+            if (currentBalance <= 0) {
+              continue;
+            }
+            const deduction = Math.min(currentBalance, perUser);
+            if (deduction <= 0) {
+              continue;
+            }
+            await this.usersRepo
+              .createQueryBuilder()
+              .update(UserEntity)
+              .set({
+                balance: () => `"balance" - ${deduction}`,
+                totalCost: () => `"totalCost" + ${deduction}`,
+              } as any)
+              .where('id = :id', { id: u.id })
+              .andWhere('balance > 0')
+              .execute();
+          }
         }
       }
       if (dto.dailySell && Number(dto.dailySell) !== 0) {
