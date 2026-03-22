@@ -13,10 +13,11 @@ export class NoticeService {
   ) {}
 
   async create(createNoticeDto: CreateNoticeDto): Promise<NoticeEntity> {
-    const notice = this.noticeRepository.create({
-      ...createNoticeDto,
-      isPublic: createNoticeDto.isPublic === 'true' || createNoticeDto.isPublic === true,
-    });
+    const { isPublic, ...rest } = createNoticeDto;
+    const notice = this.noticeRepository.create(rest);
+    if (isPublic !== undefined) {
+      notice.isPublic = isPublic;
+    }
     return this.noticeRepository.save(notice);
   }
 
@@ -75,11 +76,6 @@ export class NoticeService {
     updateNoticeDto: UpdateNoticeDto,
   ): Promise<NoticeEntity> {
     const notice = await this.findOne(id);
-    
-    // Convert isPublic string if sent via form-data
-    if (updateNoticeDto.isPublic !== undefined) {
-      updateNoticeDto.isPublic = updateNoticeDto.isPublic === 'true' || updateNoticeDto.isPublic === true;
-    }
 
     const merged = this.noticeRepository.merge(notice, updateNoticeDto);
     return this.noticeRepository.save(merged);

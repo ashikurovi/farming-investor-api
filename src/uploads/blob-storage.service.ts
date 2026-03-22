@@ -30,6 +30,10 @@ export class BlobStorageService {
     return this.upload(file, 'uploads/notices');
   }
 
+  async uploadDeedFile(file: any): Promise<string> {
+    return this.upload(file, 'uploads/deeds');
+  }
+
   private async upload(file: any, prefix: string): Promise<string> {
     if (!file || !file.buffer) {
       throw new InternalServerErrorException(

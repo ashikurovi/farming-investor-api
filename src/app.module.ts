@@ -14,6 +14,8 @@ import { ContactModule } from './contact/contact.module';
 import { DailyReportModule } from './daily-report/daily-report.module';
 import { InvestmentModule } from './investment/investment.module';
 import { NoticeModule } from './notice/notice.module';
+import { DeedModule } from './deed/deed.module';
+
 
 @Module({
   imports: [
@@ -50,9 +52,11 @@ import { NoticeModule } from './notice/notice.module';
     DailyReportModule,
     InvestmentModule,
     NoticeModule,
+    DeedModule,
+
   ],
 
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }
