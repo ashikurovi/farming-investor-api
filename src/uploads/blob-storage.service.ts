@@ -26,6 +26,10 @@ export class BlobStorageService {
     return this.upload(file, 'uploads/glarry');
   }
 
+  async uploadNoticeFile(file: any): Promise<string> {
+    return this.upload(file, 'uploads/notices');
+  }
+
   private async upload(file: any, prefix: string): Promise<string> {
     if (!file || !file.buffer) {
       throw new InternalServerErrorException(

@@ -4,5 +4,6 @@ export declare class BlobStorageService {
     uploadBannerPhoto(file: any): Promise<string>;
     uploadProjectImage(file: any): Promise<string>;
     uploadGlarryPhoto(file: any): Promise<string>;
+    uploadNoticeFile(file: any): Promise<string>;
     private upload;
 }

@@ -13,6 +13,7 @@ import { InvestorTypeModule } from './investor-type/investor-type.module';
 import { ContactModule } from './contact/contact.module';
 import { DailyReportModule } from './daily-report/daily-report.module';
 import { InvestmentModule } from './investment/investment.module';
+import { NoticeModule } from './notice/notice.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { InvestmentModule } from './investment/investment.module';
     ContactModule,
     DailyReportModule,
     InvestmentModule,
+    NoticeModule,
   ],
 
   controllers: [AppController],

@@ -22,6 +22,7 @@ const investor_type_module_1 = require("./investor-type/investor-type.module");
 const contact_module_1 = require("./contact/contact.module");
 const daily_report_module_1 = require("./daily-report/daily-report.module");
 const investment_module_1 = require("./investment/investment.module");
+const notice_module_1 = require("./notice/notice.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -56,6 +57,7 @@ exports.AppModule = AppModule = __decorate([
             contact_module_1.ContactModule,
             daily_report_module_1.DailyReportModule,
             investment_module_1.InvestmentModule,
+            notice_module_1.NoticeModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],
