@@ -31,4 +31,12 @@ export class CreateInvestmentDto {
   @IsString()
   @IsNotEmpty()
   time: string;
+
+  @IsOptional()
+  @IsDateString()
+  startDate?: string;
+
+  @IsOptional()
+  @IsDateString()
+  endDate?: string;
 }

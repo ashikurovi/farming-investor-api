@@ -5,10 +5,16 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Investment } from './entities/investment.entity';
 import { UserEntity } from '../users/entities/user.entity';
 import { UsersModule } from '../users/users.module';
+import { InvestamountModule } from '../investamount/investamount.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Investment, UserEntity]), UsersModule],
+  imports: [
+    TypeOrmModule.forFeature([Investment, UserEntity]),
+    UsersModule,
+    InvestamountModule,
+  ],
   controllers: [InvestmentController],
   providers: [InvestmentService],
+  exports: [InvestmentService],
 })
 export class InvestmentModule {}

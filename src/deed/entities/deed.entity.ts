@@ -7,19 +7,19 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { UserEntity } from '../../users/entities/user.entity';
+import { Investment } from '../../investment/entities/investment.entity';
 
 @Entity('tbl_deeds')
 export class Deed {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ name: 'investor_id', nullable: true })
-  investorId: number;
+  @Column({ name: 'investment_id', nullable: true })
+  investmentId: number;
 
-  @ManyToOne(() => UserEntity, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'investor_id' })
-  investor: UserEntity;
+  @ManyToOne(() => Investment, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'investment_id' })
+  investment: Investment;
 
   @Column({ nullable: true })
   title: string;

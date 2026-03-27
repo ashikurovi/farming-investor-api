@@ -3,7 +3,7 @@ import { IsOptional, IsString, IsNumber, IsDateString } from 'class-validator';
 export class CreateDeedDto {
   @IsOptional()
   @IsNumber()
-  investorId?: number;
+  investmentId?: number;
 
   @IsOptional()
   @IsString()

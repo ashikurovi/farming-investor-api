@@ -10,6 +10,8 @@ import { UpdateInvestmentDto } from './dto/update-investment.dto';
 import { Investment } from './entities/investment.entity';
 import { UserEntity, UserRole } from '../users/entities/user.entity';
 
+import { InvestamountService } from '../investamount/investamount.service';
+
 @Injectable()
 export class InvestmentService {
   constructor(
@@ -17,6 +19,7 @@ export class InvestmentService {
     private readonly investmentRepo: Repository<Investment>,
     @InjectRepository(UserEntity)
     private readonly userRepo: Repository<UserEntity>,
+    private readonly investAmountService: InvestamountService,
   ) {}
 
   async create(createInvestmentDto: CreateInvestmentDto) {
@@ -27,39 +30,65 @@ export class InvestmentService {
       throw new BadRequestException('Investor not found');
     }
 
-    const investment = this.investmentRepo.create({
-      investorId: createInvestmentDto.investorId,
-      amount: createInvestmentDto.amount,
-      reference: createInvestmentDto.reference,
-      photoUrl: createInvestmentDto.photoUrl,
-      date: createInvestmentDto.date,
-      time: createInvestmentDto.time,
+    const unitSetting = await this.investAmountService.findFirst();
+    const unitAmount = Number(unitSetting?.amount || 0);
+    const totalAmount = Number(createInvestmentDto.amount);
+
+    return await this.investmentRepo.manager.transaction(async (manager) => {
+      const createdInvestments: Investment[] = [];
+
+      if (unitAmount > 0 && totalAmount >= unitAmount) {
+        let remainingAmount = totalAmount;
+        while (remainingAmount >= unitAmount) {
+          const investment = manager.getRepository(Investment).create({
+            ...createInvestmentDto,
+            amount: unitAmount,
+          });
+          const saved = await manager.getRepository(Investment).save(investment);
+          createdInvestments.push(saved);
+          remainingAmount -= unitAmount;
+        }
+
+        if (remainingAmount > 0) {
+          const investment = manager.getRepository(Investment).create({
+            ...createInvestmentDto,
+            amount: remainingAmount,
+          });
+          const saved = await manager.getRepository(Investment).save(investment);
+          createdInvestments.push(saved);
+        }
+      } else {
+        const investment = manager.getRepository(Investment).create({
+          ...createInvestmentDto,
+          amount: totalAmount,
+        });
+        const saved = await manager.getRepository(Investment).save(investment);
+        createdInvestments.push(saved);
+      }
+
+      // Update user balances once for the total amount
+      await manager
+        .getRepository(UserEntity)
+        .increment({ id: user.id }, 'totalInvestment', totalAmount);
+      await manager
+        .getRepository(UserEntity)
+        .increment({ id: user.id }, 'balance', totalAmount);
+
+      // Return the first one but include all IDs for the frontend to handle deeds
+      return {
+        ...createdInvestments[0],
+        id: createdInvestments[0].id,
+        allIds: createdInvestments.map((inv) => inv.id),
+        count: createdInvestments.length,
+      };
     });
-
-    const saved = await this.investmentRepo.manager.transaction(
-      async (manager) => {
-        const invSaved = await manager
-          .getRepository(Investment)
-          .save(investment);
-        await manager
-          .getRepository(UserEntity)
-          .increment(
-            { id: user.id },
-            'totalInvestment',
-            Number(invSaved.amount),
-          );
-        await manager
-          .getRepository(UserEntity)
-          .increment({ id: user.id }, 'balance', Number(invSaved.amount));
-        return invSaved;
-      },
-    );
-
-    return saved;
   }
 
   async findAll() {
-    return this.investmentRepo.find({ order: { id: 'DESC' } });
+    return this.investmentRepo.createQueryBuilder('investment')
+      .leftJoinAndSelect('investment.investor', 'investor')
+      .orderBy('investment.id', 'DESC')
+      .getMany();
   }
 
   async stats(): Promise<{
@@ -110,7 +139,11 @@ export class InvestmentService {
   }
 
   async findOne(id: number) {
-    const entity = await this.investmentRepo.findOne({ where: { id } });
+    const entity = await this.investmentRepo.createQueryBuilder('investment')
+      .leftJoinAndSelect('investment.investor', 'investor')
+      .leftJoinAndSelect('investment.deeds', 'deeds')
+      .where('investment.id = :id', { id })
+      .getOne();
     if (!entity) {
       throw new NotFoundException(`Investment with id "${id}" not found`);
     }
@@ -160,5 +193,40 @@ export class InvestmentService {
         );
     });
     return { deleted: true };
+  }
+
+  async refreshInvestmentStatuses() {
+    const now = new Date();
+    const today = now.toISOString().split('T')[0];
+
+    // Find all active investments that have reached their end date
+    const expiredInvestments = await this.investmentRepo
+      .createQueryBuilder('inv')
+      .where('inv.isActive = :active', { active: true })
+      .andWhere('inv.endDate IS NOT NULL')
+      .andWhere('inv.endDate < :today', { today })
+      .getMany();
+
+    if (expiredInvestments.length === 0) {
+      return;
+    }
+
+    await this.investmentRepo.manager.transaction(async (manager) => {
+      for (const inv of expiredInvestments) {
+        // Deactivate the investment
+        await manager
+          .getRepository(Investment)
+          .update({ id: inv.id }, { isActive: false });
+
+        // Decrement the user's total investment
+        await manager
+          .getRepository(UserEntity)
+          .increment(
+            { id: inv.investorId },
+            'totalInvestment',
+            -Number(inv.amount),
+          );
+      }
+    });
   }
 }

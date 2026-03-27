@@ -6,6 +6,7 @@ import { UpdateDailyReportDto } from './dto/update-daily-report.dto';
 import { DailyReport } from './entities/daily-report.entity';
 import { Project } from '../projects/entities/project.entity';
 import { UserEntity, UserRole } from '../users/entities/user.entity';
+import { InvestmentService } from '../investment/investment.service';
 
 @Injectable()
 export class DailyReportService {
@@ -16,9 +17,12 @@ export class DailyReportService {
     private readonly projectsRepo: Repository<Project>,
     @InjectRepository(UserEntity)
     private readonly usersRepo: Repository<UserEntity>,
+    private readonly investmentService: InvestmentService,
   ) {}
 
   async create(dto: CreateDailyReportDto) {
+    await this.investmentService.refreshInvestmentStatuses();
+
     return this.dailyReportRepo.manager.transaction(async (manager) => {
       const projRepo = manager.getRepository(Project);
       const reportRepo = manager.getRepository(DailyReport);
@@ -51,6 +55,7 @@ export class DailyReportService {
           .where('u.role = :role', { role: UserRole.INVESTOR })
           .andWhere('u.isBanned = :banned', { banned: false })
           .andWhere('u.balance > 0')
+          .andWhere('u.totalInvestment > 0')
           .getMany();
         const eligibleCount = eligibleUsers.length;
         if (eligibleCount > 0) {
@@ -107,6 +112,7 @@ export class DailyReportService {
           .leftJoinAndSelect('u.investorType', 'investorType')
           .where('u.role = :role', { role: UserRole.INVESTOR })
           .andWhere('u.isBanned = :banned', { banned: false })
+          .andWhere('u.totalInvestment > 0')
           .getMany();
         const totalInvest = users.reduce(
           (sum, u) => sum + Number(u.totalInvestment || 0),

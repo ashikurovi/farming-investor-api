@@ -3,9 +3,11 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { UserEntity } from '../../users/entities/user.entity';
+import { Deed } from '../../deed/entities/deed.entity';
 
 @Entity('tbl_investments')
 export class Investment {
@@ -33,4 +35,16 @@ export class Investment {
 
   @Column({ type: 'time', nullable: true })
   time?: string;
+
+  @Column({ type: 'date', nullable: true })
+  startDate?: string;
+
+  @Column({ type: 'date', nullable: true })
+  endDate?: string;
+
+  @Column({ default: true })
+  isActive: boolean;
+
+  @OneToMany(() => Deed, (deed) => deed.investment)
+  deeds: Deed[];
 }

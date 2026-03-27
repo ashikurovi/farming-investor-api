@@ -9,39 +9,39 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CreateNoticeDto = void 0;
-const class_transformer_1 = require("class-transformer");
+exports.CreateDeedDto = void 0;
 const class_validator_1 = require("class-validator");
-class CreateNoticeDto {
+class CreateDeedDto {
 }
-exports.CreateNoticeDto = CreateNoticeDto;
-__decorate([
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsNotEmpty)(),
-    __metadata("design:type", String)
-], CreateNoticeDto.prototype, "title", void 0);
-__decorate([
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsNotEmpty)(),
-    __metadata("design:type", String)
-], CreateNoticeDto.prototype, "description", void 0);
+exports.CreateDeedDto = CreateDeedDto;
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsUrl)(),
-    __metadata("design:type", String)
-], CreateNoticeDto.prototype, "fileUrl", void 0);
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], CreateDeedDto.prototype, "investmentId", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, class_transformer_1.Transform)(({ value }) => {
-        if (value === undefined || value === null || value === '')
-            return undefined;
-        if (value === true || value === false)
-            return value;
-        if (typeof value === 'string')
-            return value.toLowerCase() === 'true';
-        return Boolean(value);
-    }),
-    (0, class_validator_1.IsBoolean)(),
-    __metadata("design:type", Boolean)
-], CreateNoticeDto.prototype, "isPublic", void 0);
-//# sourceMappingURL=create-notice.dto.js.map
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateDeedDto.prototype, "title", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateDeedDto.prototype, "file", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateDeedDto.prototype, "uploadPdf", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", String)
+], CreateDeedDto.prototype, "issueDate", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateDeedDto.prototype, "signature", void 0);
+//# sourceMappingURL=create-deed.dto.js.map

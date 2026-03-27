@@ -221,6 +221,7 @@ export class UsersService {
 
     const qb = this.investmentRepository
       .createQueryBuilder('inv')
+      .leftJoinAndSelect('inv.deeds', 'deeds')
       .where('inv.investorId = :userId', { userId })
       .orderBy('inv.id', 'DESC')
       .skip((page - 1) * limit)

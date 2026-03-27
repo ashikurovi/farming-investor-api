@@ -21,7 +21,7 @@ export class DeedService {
     const skip = (page - 1) * limit;
     
     const queryBuilder = this.deedRepository.createQueryBuilder('deed')
-      .leftJoinAndSelect('deed.investor', 'investor')
+      .leftJoinAndSelect('deed.investment', 'investment')
       .orderBy('deed.createdAt', 'DESC');
 
     if (search) {
@@ -50,7 +50,7 @@ export class DeedService {
   async findOne(id: number) {
     const deed = await this.deedRepository.findOne({ 
       where: { id },
-      relations: ['investor']
+      relations: ['investment']
     });
     if (!deed) {
       throw new NotFoundException(`Deed with ID ${id} not found`);

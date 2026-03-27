@@ -53,7 +53,10 @@ let InvestmentService = class InvestmentService {
         return saved;
     }
     async findAll() {
-        return this.investmentRepo.find({ order: { id: 'DESC' } });
+        return this.investmentRepo.find({
+            order: { id: 'DESC' },
+            relations: ['investor'],
+        });
     }
     async stats() {
         const row = await this.investmentRepo
@@ -88,7 +91,10 @@ let InvestmentService = class InvestmentService {
         }));
     }
     async findOne(id) {
-        const entity = await this.investmentRepo.findOne({ where: { id } });
+        const entity = await this.investmentRepo.findOne({
+            where: { id },
+            relations: ['investor'],
+        });
         if (!entity) {
             throw new common_1.NotFoundException(`Investment with id "${id}" not found`);
         }

@@ -15,6 +15,7 @@ import { DailyReportModule } from './daily-report/daily-report.module';
 import { InvestmentModule } from './investment/investment.module';
 import { NoticeModule } from './notice/notice.module';
 import { DeedModule } from './deed/deed.module';
+import { InvestamountModule } from './investamount/investamount.module';
 
 
 @Module({
@@ -53,6 +54,7 @@ import { DeedModule } from './deed/deed.module';
     InvestmentModule,
     NoticeModule,
     DeedModule,
+    InvestamountModule,
 
   ],
 

@@ -52,8 +52,8 @@ export class DeedController {
       createDeedDto.signature = await this.blobStorageService.uploadDeedFile(files.signature[0]);
     }
 
-    if (createDeedDto.investorId) {
-      createDeedDto.investorId = Number(createDeedDto.investorId);
+    if (createDeedDto.investmentId) {
+      createDeedDto.investmentId = Number(createDeedDto.investmentId);
     }
 
     const deed = await this.deedService.create(createDeedDto);
@@ -126,8 +126,8 @@ export class DeedController {
       payload.signature = await this.blobStorageService.uploadDeedFile(files.signature[0]);
     }
 
-    if (payload.investorId) {
-      payload.investorId = Number(payload.investorId);
+    if (payload.investmentId) {
+      payload.investmentId = Number(payload.investmentId);
     }
 
     const deed = await this.deedService.update(+id, payload);

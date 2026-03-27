@@ -22,10 +22,11 @@ let NoticeService = class NoticeService {
         this.noticeRepository = noticeRepository;
     }
     async create(createNoticeDto) {
-        const notice = this.noticeRepository.create({
-            ...createNoticeDto,
-            isPublic: createNoticeDto.isPublic === 'true' || createNoticeDto.isPublic === true,
-        });
+        const { isPublic, ...rest } = createNoticeDto;
+        const notice = this.noticeRepository.create(rest);
+        if (isPublic !== undefined) {
+            notice.isPublic = isPublic;
+        }
         return this.noticeRepository.save(notice);
     }
     async findAll(options = {}) {
@@ -60,9 +61,6 @@ let NoticeService = class NoticeService {
     }
     async update(id, updateNoticeDto) {
         const notice = await this.findOne(id);
-        if (updateNoticeDto.isPublic !== undefined) {
-            updateNoticeDto.isPublic = updateNoticeDto.isPublic === 'true' || updateNoticeDto.isPublic === true;
-        }
         const merged = this.noticeRepository.merge(notice, updateNoticeDto);
         return this.noticeRepository.save(merged);
     }
