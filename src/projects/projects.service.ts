@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  OnModuleInit,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -13,7 +14,7 @@ import { UserEntity, UserRole } from 'src/users/entities/user.entity';
 import { DistributeProfitDto } from './dto/distribute-profit.dto';
 
 @Injectable()
-export class ProjectsService {
+export class ProjectsService implements OnModuleInit {
   constructor(
     @InjectRepository(Project)
     private readonly projectsRepo: Repository<Project>,
@@ -65,7 +66,7 @@ export class ProjectsService {
         .update(Project)
         .set({
           totalProfit: () =>
-            'CASE WHEN ("totalCost" - "totalSell") > 0 THEN ("totalCost" - "totalSell") ELSE 0 END',
+            'CASE WHEN ("totalSell" - "totalCost") > 0 THEN ("totalSell" - "totalCost") ELSE 0 END',
         } as any)
         .where('id = :id', { id })
         .execute();
@@ -142,7 +143,7 @@ export class ProjectsService {
       .addSelect('COALESCE(SUM(p.totalSell), 0)', 'totalSell')
       .addSelect('COALESCE(SUM(p.totalCost), 0)', 'totalCost')
       .addSelect(
-        'COALESCE(SUM(CASE WHEN (p.totalCost - p.totalSell) > 0 THEN (p.totalCost - p.totalSell) ELSE 0 END), 0)',
+        'COALESCE(SUM(CASE WHEN (p.totalSell - p.totalCost) > 0 THEN (p.totalSell - p.totalCost) ELSE 0 END), 0)',
         'totalProfit',
       )
       .getRawOne<{
@@ -264,5 +265,18 @@ export class ProjectsService {
       const totalWithheld = items.reduce((s, i) => s + i.withheld, 0);
       return { pool, totalWithheld, totalDistributed, items };
     });
+  }
+
+  async onModuleInit() {
+    console.log('Recalculating all project profits...');
+    await this.projectsRepo
+      .createQueryBuilder()
+      .update(Project)
+      .set({
+        totalProfit: () =>
+          'CASE WHEN ("totalSell" - "totalCost") > 0 THEN ("totalSell" - "totalCost") ELSE 0 END',
+      } as any)
+      .execute();
+    console.log('Profit recalculation complete.');
   }
 }

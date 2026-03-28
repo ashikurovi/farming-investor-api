@@ -95,7 +95,7 @@ export class DailyReportService {
         .update(Project)
         .set({
           totalProfit: () =>
-            'CASE WHEN ("totalCost" - "totalSell") > 0 THEN ("totalCost" - "totalSell") ELSE 0 END',
+            'CASE WHEN ("totalSell" - "totalCost") > 0 THEN ("totalSell" - "totalCost") ELSE 0 END',
         } as any)
         .where('id = :id', { id: dto.projectId })
         .execute();
