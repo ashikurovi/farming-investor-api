@@ -44,14 +44,26 @@ export class PartnerService {
     });
   }
 
-  async findOne(id: number): Promise<UserEntity> {
+  async findOne(id: number): Promise<any> {
     const user = await this.usersRepository.findOne({
       where: { id, role: UserRole.PARTNER },
     });
     if (!user) {
       throw new NotFoundException(`Partner with id "${id}" not found`);
     }
-    return user;
+
+    const { sum } = await this.usersRepository
+      .createQueryBuilder('user')
+      .select('SUM(user.totalInvestment)', 'sum')
+      .where('user.role = :role', { role: UserRole.PARTNER })
+      .getRawOne();
+
+    const totalPartnerInvestment = Number(sum) || 0;
+    const sharePercentage = totalPartnerInvestment > 0 && Number(user.totalInvestment) > 0
+      ? ((Number(user.totalInvestment) / totalPartnerInvestment) * 100).toFixed(2)
+      : '0.00';
+
+    return { ...user, sharePercentage };
   }
 
   async invest(partnerId: number, dto: PartnerInvestDto) {
@@ -179,6 +191,13 @@ export class PartnerService {
   async getPayouts(partnerId: number) {
     return this.usersRepository.manager.getRepository(PartnerPayout).find({
       where: { partnerId },
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  async getAllPayouts() {
+    return this.usersRepository.manager.getRepository(PartnerPayout).find({
+      relations: ['partner'],
       order: { createdAt: 'DESC' },
     });
   }

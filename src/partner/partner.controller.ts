@@ -27,6 +27,13 @@ export class PartnerController {
     return this.partnerService.findAll();
   }
 
+  @Get('payouts')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  getAllPayouts() {
+    return this.partnerService.getAllPayouts();
+  }
+
   @Get(':id')
   @UseGuards(JwtAuthGuard)
   findOne(@Param('id') id: string) {
