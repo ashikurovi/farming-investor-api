@@ -16,6 +16,7 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 import { UserEntity } from './entities/user.entity';
 import { InvestorTypeEntity } from '../investor-type/entities/investor-type.entity';
 import { Investment } from '../investment/entities/investment.entity';
+import { PartnerService } from '../partner/partner.service';
 
 @Injectable()
 export class UsersService {
@@ -27,6 +28,7 @@ export class UsersService {
     @InjectRepository(Investment)
     private readonly investmentRepository: Repository<Investment>,
     private readonly jwtService: JwtService,
+    private readonly partnerService: PartnerService,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<UserEntity> {
@@ -113,26 +115,58 @@ export class UsersService {
   }
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<UserEntity> {
-    const user = await this.findOne(id);
-    let payload = { ...updateUserDto };
-    
-    if (updateUserDto.password) {
-      const hashedPassword = await bcrypt.hash(updateUserDto.password, 10);
-      payload.password = hashedPassword;
-    }
-
-    if (updateUserDto.investorTypeId !== undefined) {
-      if (updateUserDto.investorTypeId === null) {
-        user.investorType = null;
-        user.investorTypeId = null;
-      } else {
-        user.investorType = { id: updateUserDto.investorTypeId } as any;
-        user.investorTypeId = updateUserDto.investorTypeId;
+    return this.usersRepository.manager.transaction(async (manager) => {
+      const usersRepo = manager.getRepository(UserEntity);
+      const user = await usersRepo.findOne({
+        where: { id },
+        relations: ['investorType'],
+      });
+      if (!user) {
+        throw new NotFoundException(`User with id "${id}" not found`);
       }
-    }
 
-    const merged = this.usersRepository.merge(user, payload);
-    return this.usersRepository.save(merged);
+      let payload = { ...updateUserDto };
+      if (updateUserDto.password) {
+        const hashedPassword = await bcrypt.hash(updateUserDto.password, 10);
+        payload.password = hashedPassword;
+      }
+
+      let retroactiveDeduction = 0;
+
+      if (updateUserDto.investorTypeId !== undefined) {
+        if (updateUserDto.investorTypeId === null) {
+          user.investorType = null;
+          user.investorTypeId = null;
+        } else {
+          if (user.investorType?.id !== updateUserDto.investorTypeId) {
+            const newType = await manager.getRepository(InvestorTypeEntity).findOne({
+              where: { id: updateUserDto.investorTypeId },
+            });
+            if (newType) {
+              const currentProfit = Number(user.totalProfit || 0);
+              const newPercentage = Number(newType.percentage || 0);
+              
+              if (currentProfit > 0 && newPercentage > 0) {
+                retroactiveDeduction = currentProfit * (newPercentage / 100);
+                user.totalProfit = currentProfit - retroactiveDeduction;
+              }
+              
+              user.investorType = newType;
+              user.investorTypeId = updateUserDto.investorTypeId;
+            }
+          }
+        }
+      }
+
+      const merged = usersRepo.merge(user, payload);
+      const savedUser = await usersRepo.save(merged);
+
+      if (retroactiveDeduction > 0) {
+        await this.partnerService.distributeCommissionWithManager(manager, retroactiveDeduction);
+      }
+
+      return savedUser;
+    });
   }
 
   async remove(id: number): Promise<void> {

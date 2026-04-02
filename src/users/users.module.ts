@@ -6,10 +6,12 @@ import { UsersController } from './users.controller';
 import { UserEntity } from './entities/user.entity';
 import { InvestorTypeEntity } from '../investor-type/entities/investor-type.entity';
 import { Investment } from '../investment/entities/investment.entity';
+import { PartnerModule } from '../partner/partner.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([UserEntity, InvestorTypeEntity, Investment]),
+    PartnerModule,
   ],
   controllers: [UsersController],
   providers: [UsersService],

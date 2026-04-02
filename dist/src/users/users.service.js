@@ -54,12 +54,14 @@ const bcrypt = __importStar(require("bcrypt"));
 const user_entity_1 = require("./entities/user.entity");
 const investor_type_entity_1 = require("../investor-type/entities/investor-type.entity");
 const investment_entity_1 = require("../investment/entities/investment.entity");
+const partner_service_1 = require("../partner/partner.service");
 let UsersService = class UsersService {
-    constructor(usersRepository, investorTypeRepository, investmentRepository, jwtService) {
+    constructor(usersRepository, investorTypeRepository, investmentRepository, jwtService, partnerService) {
         this.usersRepository = usersRepository;
         this.investorTypeRepository = investorTypeRepository;
         this.investmentRepository = investmentRepository;
         this.jwtService = jwtService;
+        this.partnerService = partnerService;
     }
     async create(createUserDto) {
         let investorType = null;
@@ -122,24 +124,51 @@ let UsersService = class UsersService {
         return user;
     }
     async update(id, updateUserDto) {
-        const user = await this.findOne(id);
-        let payload = { ...updateUserDto };
-        if (updateUserDto.password) {
-            const hashedPassword = await bcrypt.hash(updateUserDto.password, 10);
-            payload.password = hashedPassword;
-        }
-        if (updateUserDto.investorTypeId !== undefined) {
-            if (updateUserDto.investorTypeId === null) {
-                user.investorType = null;
-                user.investorTypeId = null;
+        return this.usersRepository.manager.transaction(async (manager) => {
+            const usersRepo = manager.getRepository(user_entity_1.UserEntity);
+            const user = await usersRepo.findOne({
+                where: { id },
+                relations: ['investorType'],
+            });
+            if (!user) {
+                throw new common_1.NotFoundException(`User with id "${id}" not found`);
             }
-            else {
-                user.investorType = { id: updateUserDto.investorTypeId };
-                user.investorTypeId = updateUserDto.investorTypeId;
+            let payload = { ...updateUserDto };
+            if (updateUserDto.password) {
+                const hashedPassword = await bcrypt.hash(updateUserDto.password, 10);
+                payload.password = hashedPassword;
             }
-        }
-        const merged = this.usersRepository.merge(user, payload);
-        return this.usersRepository.save(merged);
+            let retroactiveDeduction = 0;
+            if (updateUserDto.investorTypeId !== undefined) {
+                if (updateUserDto.investorTypeId === null) {
+                    user.investorType = null;
+                    user.investorTypeId = null;
+                }
+                else {
+                    if (user.investorType?.id !== updateUserDto.investorTypeId) {
+                        const newType = await manager.getRepository(investor_type_entity_1.InvestorTypeEntity).findOne({
+                            where: { id: updateUserDto.investorTypeId },
+                        });
+                        if (newType) {
+                            const currentProfit = Number(user.totalProfit || 0);
+                            const newPercentage = Number(newType.percentage || 0);
+                            if (currentProfit > 0 && newPercentage > 0) {
+                                retroactiveDeduction = currentProfit * (newPercentage / 100);
+                                user.totalProfit = currentProfit - retroactiveDeduction;
+                            }
+                            user.investorType = newType;
+                            user.investorTypeId = updateUserDto.investorTypeId;
+                        }
+                    }
+                }
+            }
+            const merged = usersRepo.merge(user, payload);
+            const savedUser = await usersRepo.save(merged);
+            if (retroactiveDeduction > 0) {
+                await this.partnerService.distributeCommissionWithManager(manager, retroactiveDeduction);
+            }
+            return savedUser;
+        });
     }
     async remove(id) {
         const result = await this.usersRepository.delete(id);
@@ -285,6 +314,7 @@ exports.UsersService = UsersService = __decorate([
     __metadata("design:paramtypes", [typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,
-        jwt_1.JwtService])
+        jwt_1.JwtService,
+        partner_service_1.PartnerService])
 ], UsersService);
 //# sourceMappingURL=users.service.js.map
