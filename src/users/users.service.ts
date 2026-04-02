@@ -114,10 +114,21 @@ export class UsersService {
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<UserEntity> {
     const user = await this.findOne(id);
-    let payload = updateUserDto;
+    let payload = { ...updateUserDto };
+    
     if (updateUserDto.password) {
       const hashedPassword = await bcrypt.hash(updateUserDto.password, 10);
-      payload = { ...updateUserDto, password: hashedPassword };
+      payload.password = hashedPassword;
+    }
+
+    if (updateUserDto.investorTypeId !== undefined) {
+      if (updateUserDto.investorTypeId === null) {
+        user.investorType = null;
+        user.investorTypeId = null;
+      } else {
+        user.investorType = { id: updateUserDto.investorTypeId } as any;
+        user.investorTypeId = updateUserDto.investorTypeId;
+      }
     }
 
     const merged = this.usersRepository.merge(user, payload);

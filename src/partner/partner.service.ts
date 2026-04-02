@@ -63,7 +63,7 @@ export class PartnerService {
       ? ((Number(user.totalInvestment) / totalPartnerInvestment) * 100).toFixed(2)
       : '0.00';
 
-    return { ...user, sharePercentage };
+    return { ...user, sharePercentage, totalPartnerInvestment };
   }
 
   async invest(partnerId: number, dto: PartnerInvestDto) {
