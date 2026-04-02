@@ -3,6 +3,7 @@ import { PartnerService } from './partner.service';
 import { CreatePartnerDto } from './dto/create-partner.dto';
 import { PartnerInvestDto } from './dto/partner-invest.dto';
 import { DistributeCommissionDto } from './dto/distribute-commission.dto';
+import { WithdrawProfitDto } from './dto/withdraw-profit.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -44,5 +45,19 @@ export class PartnerController {
   @Roles(UserRole.ADMIN)
   distributeCommission(@Body() dto: DistributeCommissionDto) {
     return this.partnerService.distributeCommission(dto);
+  }
+
+  @Post(':id/withdraw-profit')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.PARTNER)
+  withdrawProfit(@Param('id') id: string, @Body() dto: WithdrawProfitDto) {
+    return this.partnerService.withdrawProfit(+id, dto);
+  }
+
+  @Get(':id/payouts')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.PARTNER)
+  getPayouts(@Param('id') id: string) {
+    return this.partnerService.getPayouts(+id);
   }
 }

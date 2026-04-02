@@ -8,6 +8,8 @@ import { Investment } from '../investment/entities/investment.entity';
 import { CreatePartnerDto } from './dto/create-partner.dto';
 import { PartnerInvestDto } from './dto/partner-invest.dto';
 import { DistributeCommissionDto } from './dto/distribute-commission.dto';
+import { WithdrawProfitDto } from './dto/withdraw-profit.dto';
+import { PartnerPayout } from './entities/partner-payout.entity';
 
 @Injectable()
 export class PartnerService {
@@ -126,6 +128,58 @@ export class PartnerService {
         totalPartnerInvestment,
         distributions
       };
+    });
+  }
+
+  async withdrawProfit(partnerId: number, dto: WithdrawProfitDto) {
+    const amountToWithdraw = Number(dto.amount);
+    if (!isFinite(amountToWithdraw) || amountToWithdraw <= 0) {
+      throw new BadRequestException('Amount must be greater than 0');
+    }
+
+    return await this.usersRepository.manager.transaction(async (manager) => {
+      const partner = await manager.getRepository(UserEntity).findOne({
+        where: { id: partnerId, role: UserRole.PARTNER },
+      });
+
+      if (!partner) {
+        throw new NotFoundException(`Partner with id "${partnerId}" not found`);
+      }
+
+      const currentProfit = Number(partner.totalProfit || 0);
+      if (currentProfit < amountToWithdraw) {
+        throw new BadRequestException('Insufficient profit balance');
+      }
+
+      await manager.getRepository(UserEntity).decrement(
+        { id: partnerId },
+        'totalProfit',
+        amountToWithdraw,
+      );
+
+      const reference = `PYT-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+
+      const payout = manager.getRepository(PartnerPayout).create({
+        partnerId,
+        amount: amountToWithdraw,
+        reference,
+      });
+
+      await manager.getRepository(PartnerPayout).save(payout);
+
+      return {
+        success: true,
+        withdrawn: amountToWithdraw,
+        remainingProfit: currentProfit - amountToWithdraw,
+        reference,
+      };
+    });
+  }
+
+  async getPayouts(partnerId: number) {
+    return this.usersRepository.manager.getRepository(PartnerPayout).find({
+      where: { partnerId },
+      order: { createdAt: 'DESC' },
     });
   }
 

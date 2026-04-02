@@ -2,6 +2,7 @@ import { PartnerService } from './partner.service';
 import { CreatePartnerDto } from './dto/create-partner.dto';
 import { PartnerInvestDto } from './dto/partner-invest.dto';
 import { DistributeCommissionDto } from './dto/distribute-commission.dto';
+import { WithdrawProfitDto } from './dto/withdraw-profit.dto';
 export declare class PartnerController {
     private readonly partnerService;
     constructor(partnerService: PartnerService);
@@ -14,5 +15,10 @@ export declare class PartnerController {
         totalDistributed: number;
         totalPartnerInvestment: number;
         distributions: any[];
+    }>;
+    withdrawProfit(id: string, dto: WithdrawProfitDto): Promise<{
+        success: boolean;
+        withdrawn: number;
+        remainingProfit: number;
     }>;
 }

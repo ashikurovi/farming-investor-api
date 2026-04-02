@@ -135,6 +135,30 @@ let PartnerService = class PartnerService {
             };
         });
     }
+    async withdrawProfit(partnerId, dto) {
+        const amountToWithdraw = Number(dto.amount);
+        if (!isFinite(amountToWithdraw) || amountToWithdraw <= 0) {
+            throw new common_1.BadRequestException('Amount must be greater than 0');
+        }
+        return await this.usersRepository.manager.transaction(async (manager) => {
+            const partner = await manager.getRepository(user_entity_1.UserEntity).findOne({
+                where: { id: partnerId, role: user_entity_1.UserRole.PARTNER },
+            });
+            if (!partner) {
+                throw new common_1.NotFoundException(`Partner with id "${partnerId}" not found`);
+            }
+            const currentProfit = Number(partner.totalProfit || 0);
+            if (currentProfit < amountToWithdraw) {
+                throw new common_1.BadRequestException('Insufficient profit balance');
+            }
+            await manager.getRepository(user_entity_1.UserEntity).decrement({ id: partnerId }, 'totalProfit', amountToWithdraw);
+            return {
+                success: true,
+                withdrawn: amountToWithdraw,
+                remainingProfit: currentProfit - amountToWithdraw,
+            };
+        });
+    }
     async distributeCommissionWithManager(manager, commissionAmount) {
         if (commissionAmount <= 0)
             return;
