@@ -78,6 +78,7 @@ export class DailyReportService {
               .set({
                 balance: () => `"balance" - ${deduction}`,
                 totalCost: () => `"totalCost" + ${deduction}`,
+                lifetimeCost: () => `"lifetimeCost" + ${deduction}`,
               } as any)
               .where('id = :id', { id: u.id })
               .andWhere('balance > 0')
@@ -140,6 +141,7 @@ export class DailyReportService {
                 .update(UserEntity)
                 .set({
                   totalProfit: () => `"totalProfit" + ${final}`,
+                  lifetimeProfit: () => `"lifetimeProfit" + ${final}`,
                 } as any)
                 .where('id = :id', { id: u.id })
                 .execute();

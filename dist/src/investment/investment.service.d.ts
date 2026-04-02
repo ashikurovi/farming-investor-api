@@ -45,4 +45,5 @@ export declare class InvestmentService {
         deleted: boolean;
     }>;
     refreshInvestmentStatuses(): Promise<void>;
+    syncRetroactiveFinances(manager: any): Promise<void>;
 }

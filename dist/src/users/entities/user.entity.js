@@ -66,6 +66,18 @@ __decorate([
     __metadata("design:type", Number)
 ], UserEntity.prototype, "totalCost", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ type: 'decimal', precision: 12, scale: 2, default: 0 }),
+    __metadata("design:type", Number)
+], UserEntity.prototype, "lifetimeCost", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'decimal', precision: 12, scale: 2, default: 0 }),
+    __metadata("design:type", Number)
+], UserEntity.prototype, "lifetimeProfit", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'decimal', precision: 12, scale: 2, default: 0 }),
+    __metadata("design:type", Number)
+], UserEntity.prototype, "withdrawnProfit", void 0);
+__decorate([
     (0, typeorm_1.Column)({ type: 'enum', enum: UserRole, default: UserRole.INVESTOR }),
     __metadata("design:type", String)
 ], UserEntity.prototype, "role", void 0);

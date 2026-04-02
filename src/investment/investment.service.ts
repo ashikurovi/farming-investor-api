@@ -9,6 +9,7 @@ import { CreateInvestmentDto } from './dto/create-investment.dto';
 import { UpdateInvestmentDto } from './dto/update-investment.dto';
 import { Investment } from './entities/investment.entity';
 import { UserEntity, UserRole } from '../users/entities/user.entity';
+import { Project } from '../projects/entities/project.entity';
 
 import { InvestamountService } from '../investamount/investamount.service';
 
@@ -73,6 +74,8 @@ export class InvestmentService {
       await manager
         .getRepository(UserEntity)
         .increment({ id: user.id }, 'balance', totalAmount);
+
+      await this.syncRetroactiveFinances(manager);
 
       // Return the first one but include all IDs for the frontend to handle deeds
       return {
@@ -168,6 +171,9 @@ export class InvestmentService {
           'balance',
           diff,
         );
+        await this.investmentRepo.manager.transaction(async (manager) => {
+          await this.syncRetroactiveFinances(manager);
+        });
       }
     }
     return saved;
@@ -191,6 +197,7 @@ export class InvestmentService {
           'balance',
           -Number(entity.amount),
         );
+      await this.syncRetroactiveFinances(manager);
     });
     return { deleted: true };
   }
@@ -227,6 +234,74 @@ export class InvestmentService {
             -Number(inv.amount),
           );
       }
+      await this.syncRetroactiveFinances(manager);
     });
+  }
+
+  async syncRetroactiveFinances(manager: any) {
+    const projRepo = manager.getRepository(Project);
+    const usersRepo = manager.getRepository(UserEntity);
+
+    // Get total global profit and global cost
+    const { globalProfit } = await projRepo
+      .createQueryBuilder('p')
+      .select('SUM(p.distributedProfit)', 'globalProfit')
+      .getRawOne();
+      
+    const { globalCost } = await projRepo
+      .createQueryBuilder('p')
+      .select('SUM(p.totalCost)', 'globalCost')
+      .getRawOne();
+
+    const totalGlobalProfit = Number(globalProfit || 0);
+    const totalGlobalCost = Number(globalCost || 0);
+
+    if (totalGlobalProfit <= 0 && totalGlobalCost <= 0) return;
+
+    // Get all active INVESTORs
+    const investors = await usersRepo
+      .createQueryBuilder('u')
+      .leftJoinAndSelect('u.investorType', 'investorType')
+      .where('u.role = :role', { role: UserRole.INVESTOR })
+      .andWhere('u.isBanned = false')
+      .andWhere('u.totalInvestment > 0')
+      .getMany();
+
+    if (investors.length === 0) return;
+
+    const totalSystemInvestment = investors.reduce((sum, u) => sum + Number(u.totalInvestment || 0), 0);
+    if (totalSystemInvestment <= 0) return;
+
+    for (const u of investors) {
+      const share = Number(u.totalInvestment || 0) / totalSystemInvestment;
+      
+      const newLifetimeBaseProfit = totalGlobalProfit * share;
+      const deductionPercent = u.investorType && u.investorType.percentage != null
+          ? Number(u.investorType.percentage)
+          : 0;
+      const withheld = newLifetimeBaseProfit * (deductionPercent / 100);
+      const newLifetimeProfit = newLifetimeBaseProfit - withheld;
+      
+      const newLifetimeCost = totalGlobalCost * share;
+
+      const oldLifetimeCost = Number(u.lifetimeCost || u.totalCost || 0);
+      const diffCost = newLifetimeCost - oldLifetimeCost;
+      
+      const withdrawnProfit = Number(u.withdrawnProfit || 0);
+      // It's possible lifetime profit is now less than withdrawn profit if their share heavily dropped
+      const newTotalProfit = newLifetimeProfit - withdrawnProfit;
+
+      await usersRepo.createQueryBuilder()
+        .update(UserEntity)
+        .set({
+          totalCost: newLifetimeCost,
+          lifetimeCost: newLifetimeCost,
+          lifetimeProfit: newLifetimeProfit,
+          totalProfit: newTotalProfit,
+          balance: () => `"balance" - ${diffCost}`
+        } as any)
+        .where('id = :id', { id: u.id })
+        .execute();
+    }
   }
 }

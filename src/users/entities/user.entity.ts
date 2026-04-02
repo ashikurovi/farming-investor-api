@@ -53,6 +53,15 @@ export class UserEntity {
   @Column({ type: 'decimal', precision: 12, scale: 2, default: 0 })
   totalCost: number;
 
+  @Column({ type: 'decimal', precision: 12, scale: 2, default: 0 })
+  lifetimeCost: number;
+
+  @Column({ type: 'decimal', precision: 12, scale: 2, default: 0 })
+  lifetimeProfit: number;
+
+  @Column({ type: 'decimal', precision: 12, scale: 2, default: 0 })
+  withdrawnProfit: number;
+
   @Column({ type: 'enum', enum: UserRole, default: UserRole.INVESTOR })
   role: UserRole;
 

@@ -18,6 +18,7 @@ const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const investment_entity_1 = require("./entities/investment.entity");
 const user_entity_1 = require("../users/entities/user.entity");
+const project_entity_1 = require("../projects/entities/project.entity");
 const investamount_service_1 = require("../investamount/investamount.service");
 let InvestmentService = class InvestmentService {
     constructor(investmentRepo, userRepo, investAmountService) {
@@ -71,6 +72,7 @@ let InvestmentService = class InvestmentService {
             await manager
                 .getRepository(user_entity_1.UserEntity)
                 .increment({ id: user.id }, 'balance', totalAmount);
+            await this.syncRetroactiveFinances(manager);
             return {
                 ...createdInvestments[0],
                 id: createdInvestments[0].id,
@@ -138,6 +140,9 @@ let InvestmentService = class InvestmentService {
             if (diff !== 0) {
                 await this.userRepo.increment({ id: saved.investorId }, 'totalInvestment', diff);
                 await this.userRepo.increment({ id: saved.investorId }, 'balance', diff);
+                await this.investmentRepo.manager.transaction(async (manager) => {
+                    await this.syncRetroactiveFinances(manager);
+                });
             }
         }
         return saved;
@@ -152,6 +157,7 @@ let InvestmentService = class InvestmentService {
             await manager
                 .getRepository(user_entity_1.UserEntity)
                 .increment({ id: entity.investorId }, 'balance', -Number(entity.amount));
+            await this.syncRetroactiveFinances(manager);
         });
         return { deleted: true };
     }
@@ -176,7 +182,61 @@ let InvestmentService = class InvestmentService {
                     .getRepository(user_entity_1.UserEntity)
                     .increment({ id: inv.investorId }, 'totalInvestment', -Number(inv.amount));
             }
+            await this.syncRetroactiveFinances(manager);
         });
+    }
+    async syncRetroactiveFinances(manager) {
+        const projRepo = manager.getRepository(project_entity_1.Project);
+        const usersRepo = manager.getRepository(user_entity_1.UserEntity);
+        const { globalProfit } = await projRepo
+            .createQueryBuilder('p')
+            .select('SUM(p.distributedProfit)', 'globalProfit')
+            .getRawOne();
+        const { globalCost } = await projRepo
+            .createQueryBuilder('p')
+            .select('SUM(p.totalCost)', 'globalCost')
+            .getRawOne();
+        const totalGlobalProfit = Number(globalProfit || 0);
+        const totalGlobalCost = Number(globalCost || 0);
+        if (totalGlobalProfit <= 0 && totalGlobalCost <= 0)
+            return;
+        const investors = await usersRepo
+            .createQueryBuilder('u')
+            .leftJoinAndSelect('u.investorType', 'investorType')
+            .where('u.role = :role', { role: user_entity_1.UserRole.INVESTOR })
+            .andWhere('u.isBanned = false')
+            .andWhere('u.totalInvestment > 0')
+            .getMany();
+        if (investors.length === 0)
+            return;
+        const totalSystemInvestment = investors.reduce((sum, u) => sum + Number(u.totalInvestment || 0), 0);
+        if (totalSystemInvestment <= 0)
+            return;
+        for (const u of investors) {
+            const share = Number(u.totalInvestment || 0) / totalSystemInvestment;
+            const newLifetimeBaseProfit = totalGlobalProfit * share;
+            const deductionPercent = u.investorType && u.investorType.percentage != null
+                ? Number(u.investorType.percentage)
+                : 0;
+            const withheld = newLifetimeBaseProfit * (deductionPercent / 100);
+            const newLifetimeProfit = newLifetimeBaseProfit - withheld;
+            const newLifetimeCost = totalGlobalCost * share;
+            const oldLifetimeCost = Number(u.lifetimeCost || u.totalCost || 0);
+            const diffCost = newLifetimeCost - oldLifetimeCost;
+            const withdrawnProfit = Number(u.withdrawnProfit || 0);
+            const newTotalProfit = newLifetimeProfit - withdrawnProfit;
+            await usersRepo.createQueryBuilder()
+                .update(user_entity_1.UserEntity)
+                .set({
+                totalCost: newLifetimeCost,
+                lifetimeCost: newLifetimeCost,
+                lifetimeProfit: newLifetimeProfit,
+                totalProfit: newTotalProfit,
+                balance: () => `"balance" - ${diffCost}`
+            })
+                .where('id = :id', { id: u.id })
+                .execute();
+        }
     }
 };
 exports.InvestmentService = InvestmentService;

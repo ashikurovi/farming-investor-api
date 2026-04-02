@@ -97,14 +97,14 @@ export class InvestorTypeService {
       if (pool > 0 && users.length > 0 && totalInvest > 0) {
         for (const u of users) {
           const share = Number(u.totalInvestment || 0) / totalInvest;
-          const investorTypePercent =
+          const deductionPercent =
             u.investorType && u.investorType.percentage != null
               ? Number(u.investorType.percentage)
-              : 100;
-          const pct = investorTypePercent / 100;
+              : 0;
+          const deductionFraction = deductionPercent / 100;
           const base = pool * share;
-          const final = base * pct;
-          const withheld = base - final;
+          const withheld = base * deductionFraction;
+          const final = base - withheld;
           totalWithheld += withheld;
           if (final !== 0) {
             await usersRepo

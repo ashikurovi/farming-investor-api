@@ -322,7 +322,10 @@ export class UsersService {
         await repo
           .createQueryBuilder()
           .update(UserEntity)
-          .set({ totalProfit: 0 } as any)
+          .set({ 
+            totalProfit: 0,
+            withdrawnProfit: () => `"withdrawnProfit" + ${withdrawnProfit}`
+          } as any)
           .where('id = :id', { id: userId })
           .execute();
       }
@@ -346,7 +349,11 @@ export class UsersService {
       await repo
         .createQueryBuilder()
         .update(UserEntity)
-        .set({ totalProfit: 0, totalInvestment: 0 } as any)
+        .set({ 
+          totalProfit: 0, 
+          totalInvestment: 0,
+          withdrawnProfit: () => `"withdrawnProfit" + ${withdrawnProfit}`
+        } as any)
         .where('id = :id', { id: userId })
         .execute();
       return { userId, withdrawnProfit, withdrawnInvestment };

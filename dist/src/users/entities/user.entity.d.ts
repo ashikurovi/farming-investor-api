@@ -16,6 +16,9 @@ export declare class UserEntity {
     totalProfit: number;
     balance: number;
     totalCost: number;
+    lifetimeCost: number;
+    lifetimeProfit: number;
+    withdrawnProfit: number;
     role: UserRole;
     isBanned: boolean;
     investorTypeId?: number;
