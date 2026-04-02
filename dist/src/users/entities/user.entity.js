@@ -16,6 +16,7 @@ var UserRole;
 (function (UserRole) {
     UserRole["ADMIN"] = "admin";
     UserRole["INVESTOR"] = "investor";
+    UserRole["PARTNER"] = "partner";
 })(UserRole || (exports.UserRole = UserRole = {}));
 let UserEntity = class UserEntity {
 };

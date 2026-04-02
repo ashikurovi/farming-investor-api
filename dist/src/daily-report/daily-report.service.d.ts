@@ -4,11 +4,15 @@ import { UpdateDailyReportDto } from './dto/update-daily-report.dto';
 import { DailyReport } from './entities/daily-report.entity';
 import { Project } from '../projects/entities/project.entity';
 import { UserEntity } from '../users/entities/user.entity';
+import { InvestmentService } from '../investment/investment.service';
+import { PartnerService } from 'src/partner/partner.service';
 export declare class DailyReportService {
     private readonly dailyReportRepo;
     private readonly projectsRepo;
     private readonly usersRepo;
-    constructor(dailyReportRepo: Repository<DailyReport>, projectsRepo: Repository<Project>, usersRepo: Repository<UserEntity>);
+    private readonly investmentService;
+    private readonly partnerService;
+    constructor(dailyReportRepo: Repository<DailyReport>, projectsRepo: Repository<Project>, usersRepo: Repository<UserEntity>, investmentService: InvestmentService, partnerService: PartnerService);
     create(dto: CreateDailyReportDto): Promise<DailyReport>;
     findAll(): Promise<DailyReport[]>;
     findOne(id: number): Promise<DailyReport>;

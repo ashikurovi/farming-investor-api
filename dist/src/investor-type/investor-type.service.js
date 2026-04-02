@@ -19,9 +19,11 @@ const typeorm_2 = require("typeorm");
 const investor_type_entity_1 = require("./entities/investor-type.entity");
 const project_entity_1 = require("../projects/entities/project.entity");
 const user_entity_1 = require("../users/entities/user.entity");
+const partner_service_1 = require("../partner/partner.service");
 let InvestorTypeService = class InvestorTypeService {
-    constructor(investorTypeRepo) {
+    constructor(investorTypeRepo, partnerService) {
         this.investorTypeRepo = investorTypeRepo;
+        this.partnerService = partnerService;
     }
     async create(createInvestorTypeDto) {
         const entity = this.investorTypeRepo.create({
@@ -72,10 +74,11 @@ let InvestorTypeService = class InvestorTypeService {
                 .createQueryBuilder()
                 .update(user_entity_1.UserEntity)
                 .set({ totalProfit: 0 })
-                .where('role = :role', { role: user_entity_1.UserRole.INVESTOR })
+                .where('role IN (:...roles)', { roles: [user_entity_1.UserRole.INVESTOR, user_entity_1.UserRole.PARTNER] })
                 .andWhere('isBanned = :banned', { banned: false })
                 .execute();
             const totalInvest = users.reduce((sum, u) => sum + Number(u.totalInvestment || 0), 0);
+            let totalWithheld = 0;
             if (pool > 0 && users.length > 0 && totalInvest > 0) {
                 for (const u of users) {
                     const share = Number(u.totalInvestment || 0) / totalInvest;
@@ -83,7 +86,10 @@ let InvestorTypeService = class InvestorTypeService {
                         ? Number(u.investorType.percentage)
                         : 100;
                     const pct = investorTypePercent / 100;
-                    const final = pool * share * pct;
+                    const base = pool * share;
+                    const final = base * pct;
+                    const withheld = base - final;
+                    totalWithheld += withheld;
                     if (final !== 0) {
                         await usersRepo
                             .createQueryBuilder()
@@ -95,6 +101,9 @@ let InvestorTypeService = class InvestorTypeService {
                             .execute();
                     }
                 }
+            }
+            if (totalWithheld > 0) {
+                await this.partnerService.distributeCommissionWithManager(manager, totalWithheld);
             }
         });
         return this.toResponse(saved);
@@ -117,6 +126,7 @@ exports.InvestorTypeService = InvestorTypeService;
 exports.InvestorTypeService = InvestorTypeService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(investor_type_entity_1.InvestorTypeEntity)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        partner_service_1.PartnerService])
 ], InvestorTypeService);
 //# sourceMappingURL=investor-type.service.js.map

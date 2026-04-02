@@ -5,4 +5,6 @@ export declare class CreateInvestmentDto {
     photoUrl?: string;
     date: string;
     time: string;
+    startDate?: string;
+    endDate?: string;
 }

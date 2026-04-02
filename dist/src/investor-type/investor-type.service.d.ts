@@ -7,9 +7,11 @@ export type InvestorTypeResponse = {
     type: string;
     percentage: number;
 };
+import { PartnerService } from 'src/partner/partner.service';
 export declare class InvestorTypeService {
     private readonly investorTypeRepo;
-    constructor(investorTypeRepo: Repository<InvestorTypeEntity>);
+    private readonly partnerService;
+    constructor(investorTypeRepo: Repository<InvestorTypeEntity>, partnerService: PartnerService);
     create(createInvestorTypeDto: CreateInvestorTypeDto): Promise<InvestorTypeResponse>;
     findAll(): Promise<InvestorTypeResponse[]>;
     findOne(id: number): Promise<InvestorTypeResponse>;

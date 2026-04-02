@@ -8,6 +8,8 @@ import { Project } from '../projects/entities/project.entity';
 import { UserEntity, UserRole } from '../users/entities/user.entity';
 import { InvestmentService } from '../investment/investment.service';
 
+import { PartnerService } from 'src/partner/partner.service';
+
 @Injectable()
 export class DailyReportService {
   constructor(
@@ -18,6 +20,7 @@ export class DailyReportService {
     @InjectRepository(UserEntity)
     private readonly usersRepo: Repository<UserEntity>,
     private readonly investmentService: InvestmentService,
+    private readonly partnerService: PartnerService,
   ) {}
 
   async create(dto: CreateDailyReportDto) {
@@ -119,6 +122,7 @@ export class DailyReportService {
           0,
         );
         if (users.length > 0 && totalInvest > 0) {
+          let totalWithheld = 0;
           for (const u of users) {
             const share = Number(u.totalInvestment || 0) / totalInvest;
             const base = delta * share;
@@ -128,6 +132,8 @@ export class DailyReportService {
                 : 100;
             const pct = investorTypePercent / 100;
             const final = base * pct;
+            const withheld = base - final;
+            totalWithheld += withheld;
             if (final !== 0) {
               await this.usersRepo
                 .createQueryBuilder()
@@ -138,6 +144,9 @@ export class DailyReportService {
                 .where('id = :id', { id: u.id })
                 .execute();
             }
+          }
+          if (totalWithheld > 0) {
+            await this.partnerService.distributeCommissionWithManager(manager, totalWithheld);
           }
           await projRepo
             .createQueryBuilder()

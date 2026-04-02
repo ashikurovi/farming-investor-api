@@ -195,6 +195,7 @@ let UsersService = class UsersService {
         const limit = Math.min(Math.max(1, options.limit ?? 10), 100);
         const qb = this.investmentRepository
             .createQueryBuilder('inv')
+            .leftJoinAndSelect('inv.deeds', 'deeds')
             .where('inv.investorId = :userId', { userId })
             .orderBy('inv.id', 'DESC')
             .skip((page - 1) * limit)

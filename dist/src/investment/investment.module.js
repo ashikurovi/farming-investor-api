@@ -14,14 +14,20 @@ const typeorm_1 = require("@nestjs/typeorm");
 const investment_entity_1 = require("./entities/investment.entity");
 const user_entity_1 = require("../users/entities/user.entity");
 const users_module_1 = require("../users/users.module");
+const investamount_module_1 = require("../investamount/investamount.module");
 let InvestmentModule = class InvestmentModule {
 };
 exports.InvestmentModule = InvestmentModule;
 exports.InvestmentModule = InvestmentModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([investment_entity_1.Investment, user_entity_1.UserEntity]), users_module_1.UsersModule],
+        imports: [
+            typeorm_1.TypeOrmModule.forFeature([investment_entity_1.Investment, user_entity_1.UserEntity]),
+            users_module_1.UsersModule,
+            investamount_module_1.InvestamountModule,
+        ],
         controllers: [investment_controller_1.InvestmentController],
         providers: [investment_service_1.InvestmentService],
+        exports: [investment_service_1.InvestmentService],
     })
 ], InvestmentModule);
 //# sourceMappingURL=investment.module.js.map

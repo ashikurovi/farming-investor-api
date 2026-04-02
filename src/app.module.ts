@@ -16,6 +16,7 @@ import { InvestmentModule } from './investment/investment.module';
 import { NoticeModule } from './notice/notice.module';
 import { DeedModule } from './deed/deed.module';
 import { InvestamountModule } from './investamount/investamount.module';
+import { PartnerModule } from './partner/partner.module';
 
 
 @Module({
@@ -55,6 +56,7 @@ import { InvestamountModule } from './investamount/investamount.module';
     NoticeModule,
     DeedModule,
     InvestamountModule,
+    PartnerModule,
 
   ],
 

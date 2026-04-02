@@ -19,13 +19,18 @@ const typeorm_2 = require("typeorm");
 const daily_report_entity_1 = require("./entities/daily-report.entity");
 const project_entity_1 = require("../projects/entities/project.entity");
 const user_entity_1 = require("../users/entities/user.entity");
+const investment_service_1 = require("../investment/investment.service");
+const partner_service_1 = require("../partner/partner.service");
 let DailyReportService = class DailyReportService {
-    constructor(dailyReportRepo, projectsRepo, usersRepo) {
+    constructor(dailyReportRepo, projectsRepo, usersRepo, investmentService, partnerService) {
         this.dailyReportRepo = dailyReportRepo;
         this.projectsRepo = projectsRepo;
         this.usersRepo = usersRepo;
+        this.investmentService = investmentService;
+        this.partnerService = partnerService;
     }
     async create(dto) {
+        await this.investmentService.refreshInvestmentStatuses();
         return this.dailyReportRepo.manager.transaction(async (manager) => {
             const projRepo = manager.getRepository(project_entity_1.Project);
             const reportRepo = manager.getRepository(daily_report_entity_1.DailyReport);
@@ -44,6 +49,7 @@ let DailyReportService = class DailyReportService {
                     .where('u.role = :role', { role: user_entity_1.UserRole.INVESTOR })
                     .andWhere('u.isBanned = :banned', { banned: false })
                     .andWhere('u.balance > 0')
+                    .andWhere('u.totalInvestment > 0')
                     .getMany();
                 const eligibleCount = eligibleUsers.length;
                 if (eligibleCount > 0) {
@@ -77,7 +83,7 @@ let DailyReportService = class DailyReportService {
                 .createQueryBuilder()
                 .update(project_entity_1.Project)
                 .set({
-                totalProfit: () => 'CASE WHEN ("totalCost" - "totalSell") > 0 THEN ("totalCost" - "totalSell") ELSE 0 END',
+                totalProfit: () => 'CASE WHEN ("totalSell" - "totalCost") > 0 THEN ("totalSell" - "totalCost") ELSE 0 END',
             })
                 .where('id = :id', { id: dto.projectId })
                 .execute();
@@ -93,9 +99,11 @@ let DailyReportService = class DailyReportService {
                     .leftJoinAndSelect('u.investorType', 'investorType')
                     .where('u.role = :role', { role: user_entity_1.UserRole.INVESTOR })
                     .andWhere('u.isBanned = :banned', { banned: false })
+                    .andWhere('u.totalInvestment > 0')
                     .getMany();
                 const totalInvest = users.reduce((sum, u) => sum + Number(u.totalInvestment || 0), 0);
                 if (users.length > 0 && totalInvest > 0) {
+                    let totalWithheld = 0;
                     for (const u of users) {
                         const share = Number(u.totalInvestment || 0) / totalInvest;
                         const base = delta * share;
@@ -104,6 +112,8 @@ let DailyReportService = class DailyReportService {
                             : 100;
                         const pct = investorTypePercent / 100;
                         const final = base * pct;
+                        const withheld = base - final;
+                        totalWithheld += withheld;
                         if (final !== 0) {
                             await this.usersRepo
                                 .createQueryBuilder()
@@ -114,6 +124,9 @@ let DailyReportService = class DailyReportService {
                                 .where('id = :id', { id: u.id })
                                 .execute();
                         }
+                    }
+                    if (totalWithheld > 0) {
+                        await this.partnerService.distributeCommissionWithManager(manager, totalWithheld);
                     }
                     await projRepo
                         .createQueryBuilder()
@@ -157,6 +170,8 @@ exports.DailyReportService = DailyReportService = __decorate([
     __param(2, (0, typeorm_1.InjectRepository)(user_entity_1.UserEntity)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
         typeorm_2.Repository,
-        typeorm_2.Repository])
+        typeorm_2.Repository,
+        investment_service_1.InvestmentService,
+        partner_service_1.PartnerService])
 ], DailyReportService);
 //# sourceMappingURL=daily-report.service.js.map

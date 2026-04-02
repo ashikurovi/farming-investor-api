@@ -24,6 +24,8 @@ const daily_report_module_1 = require("./daily-report/daily-report.module");
 const investment_module_1 = require("./investment/investment.module");
 const notice_module_1 = require("./notice/notice.module");
 const deed_module_1 = require("./deed/deed.module");
+const investamount_module_1 = require("./investamount/investamount.module");
+const partner_module_1 = require("./partner/partner.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -60,6 +62,8 @@ exports.AppModule = AppModule = __decorate([
             investment_module_1.InvestmentModule,
             notice_module_1.NoticeModule,
             deed_module_1.DeedModule,
+            investamount_module_1.InvestamountModule,
+            partner_module_1.PartnerModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

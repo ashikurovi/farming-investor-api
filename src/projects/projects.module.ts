@@ -7,9 +7,12 @@ import { GlarryEntity } from 'src/glarry/entities/glarry.entity';
 import { DailyReport } from 'src/daily-report/entities/daily-report.entity';
 import { UserEntity } from 'src/users/entities/user.entity';
 
+import { PartnerModule } from 'src/partner/partner.module';
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([Project, GlarryEntity, DailyReport, UserEntity]),
+    PartnerModule,
   ],
   controllers: [ProjectsController],
   providers: [ProjectsService],

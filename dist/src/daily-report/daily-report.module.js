@@ -14,12 +14,18 @@ const daily_report_controller_1 = require("./daily-report.controller");
 const daily_report_entity_1 = require("./entities/daily-report.entity");
 const project_entity_1 = require("../projects/entities/project.entity");
 const user_entity_1 = require("../users/entities/user.entity");
+const investment_module_1 = require("../investment/investment.module");
+const partner_module_1 = require("../partner/partner.module");
 let DailyReportModule = class DailyReportModule {
 };
 exports.DailyReportModule = DailyReportModule;
 exports.DailyReportModule = DailyReportModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([daily_report_entity_1.DailyReport, project_entity_1.Project, user_entity_1.UserEntity])],
+        imports: [
+            typeorm_1.TypeOrmModule.forFeature([daily_report_entity_1.DailyReport, project_entity_1.Project, user_entity_1.UserEntity]),
+            investment_module_1.InvestmentModule,
+            partner_module_1.PartnerModule,
+        ],
         controllers: [daily_report_controller_1.DailyReportController],
         providers: [daily_report_service_1.DailyReportService],
     })

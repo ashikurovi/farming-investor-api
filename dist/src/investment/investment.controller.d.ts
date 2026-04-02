@@ -12,7 +12,22 @@ export declare class InvestmentController {
     create(file: any, createInvestmentDto: CreateInvestmentDto): Promise<{
         statusCode: HttpStatus;
         message: string;
-        data: import("./entities/investment.entity").Investment;
+        data: {
+            id: number;
+            allIds: number[];
+            count: number;
+            investorId: number;
+            investor: import("../users/entities/user.entity").UserEntity;
+            amount: number;
+            reference?: string;
+            photoUrl?: string;
+            date?: string;
+            time?: string;
+            startDate?: string;
+            endDate?: string;
+            isActive: boolean;
+            deeds: import("../deed/entities/deed.entity").Deed[];
+        };
     }>;
     findAll(): Promise<{
         statusCode: HttpStatus;

@@ -13,6 +13,8 @@ import { GlarryEntity } from 'src/glarry/entities/glarry.entity';
 import { UserEntity, UserRole } from 'src/users/entities/user.entity';
 import { DistributeProfitDto } from './dto/distribute-profit.dto';
 
+import { PartnerService } from 'src/partner/partner.service';
+
 @Injectable()
 export class ProjectsService implements OnModuleInit {
   constructor(
@@ -22,6 +24,7 @@ export class ProjectsService implements OnModuleInit {
     private readonly glarryRepo: Repository<GlarryEntity>,
     @InjectRepository(UserEntity)
     private readonly usersRepo: Repository<UserEntity>,
+    private readonly partnerService: PartnerService,
   ) {}
 
   async create(createProjectDto: CreateProjectDto): Promise<Project> {
@@ -86,6 +89,7 @@ export class ProjectsService implements OnModuleInit {
           0,
         );
         if (users.length > 0 && totalInvest > 0) {
+          let totalWithheld = 0;
           for (const u of users) {
             const share = Number(u.totalInvestment || 0) / totalInvest;
             const base = delta * share;
@@ -95,6 +99,8 @@ export class ProjectsService implements OnModuleInit {
                 : 100;
             const pct = investorTypePercent / 100;
             const final = base * pct;
+            const withheld = base - final;
+            totalWithheld += withheld;
             if (final !== 0) {
               await usersRepo
                 .createQueryBuilder()
@@ -106,6 +112,11 @@ export class ProjectsService implements OnModuleInit {
                 .execute();
             }
           }
+
+          if (totalWithheld > 0) {
+            await this.partnerService.distributeCommissionWithManager(manager, totalWithheld);
+          }
+
           await projRepo
             .createQueryBuilder()
             .update(Project)
@@ -263,6 +274,11 @@ export class ProjectsService implements OnModuleInit {
       }
       const totalDistributed = items.reduce((s, i) => s + i.final, 0);
       const totalWithheld = items.reduce((s, i) => s + i.withheld, 0);
+
+      if (totalWithheld > 0) {
+        await this.partnerService.distributeCommissionWithManager(manager, totalWithheld);
+      }
+
       return { pool, totalWithheld, totalDistributed, items };
     });
   }

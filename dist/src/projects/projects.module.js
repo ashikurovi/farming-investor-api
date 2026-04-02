@@ -15,6 +15,7 @@ const project_entity_1 = require("./entities/project.entity");
 const glarry_entity_1 = require("../glarry/entities/glarry.entity");
 const daily_report_entity_1 = require("../daily-report/entities/daily-report.entity");
 const user_entity_1 = require("../users/entities/user.entity");
+const partner_module_1 = require("../partner/partner.module");
 let ProjectsModule = class ProjectsModule {
 };
 exports.ProjectsModule = ProjectsModule;
@@ -22,6 +23,7 @@ exports.ProjectsModule = ProjectsModule = __decorate([
     (0, common_1.Module)({
         imports: [
             typeorm_1.TypeOrmModule.forFeature([project_entity_1.Project, glarry_entity_1.GlarryEntity, daily_report_entity_1.DailyReport, user_entity_1.UserEntity]),
+            partner_module_1.PartnerModule,
         ],
         controllers: [projects_controller_1.ProjectsController],
         providers: [projects_service_1.ProjectsService],

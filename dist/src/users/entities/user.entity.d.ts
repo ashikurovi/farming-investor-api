@@ -1,7 +1,8 @@
 import { InvestorTypeEntity } from '../../investor-type/entities/investor-type.entity';
 export declare enum UserRole {
     ADMIN = "admin",
-    INVESTOR = "investor"
+    INVESTOR = "investor",
+    PARTNER = "partner"
 }
 export declare class UserEntity {
     id: number;

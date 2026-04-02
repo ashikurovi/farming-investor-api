@@ -19,11 +19,13 @@ const typeorm_2 = require("typeorm");
 const project_entity_1 = require("./entities/project.entity");
 const glarry_entity_1 = require("../glarry/entities/glarry.entity");
 const user_entity_1 = require("../users/entities/user.entity");
+const partner_service_1 = require("../partner/partner.service");
 let ProjectsService = class ProjectsService {
-    constructor(projectsRepo, glarryRepo, usersRepo) {
+    constructor(projectsRepo, glarryRepo, usersRepo, partnerService) {
         this.projectsRepo = projectsRepo;
         this.glarryRepo = glarryRepo;
         this.usersRepo = usersRepo;
+        this.partnerService = partnerService;
     }
     async create(createProjectDto) {
         const entity = this.projectsRepo.create(createProjectDto);
@@ -59,7 +61,7 @@ let ProjectsService = class ProjectsService {
                 .createQueryBuilder()
                 .update(project_entity_1.Project)
                 .set({
-                totalProfit: () => 'CASE WHEN ("totalCost" - "totalSell") > 0 THEN ("totalCost" - "totalSell") ELSE 0 END',
+                totalProfit: () => 'CASE WHEN ("totalSell" - "totalCost") > 0 THEN ("totalSell" - "totalCost") ELSE 0 END',
             })
                 .where('id = :id', { id })
                 .execute();
@@ -75,6 +77,7 @@ let ProjectsService = class ProjectsService {
                     .getMany();
                 const totalInvest = users.reduce((sum, u) => sum + Number(u.totalInvestment || 0), 0);
                 if (users.length > 0 && totalInvest > 0) {
+                    let totalWithheld = 0;
                     for (const u of users) {
                         const share = Number(u.totalInvestment || 0) / totalInvest;
                         const base = delta * share;
@@ -83,6 +86,8 @@ let ProjectsService = class ProjectsService {
                             : 100;
                         const pct = investorTypePercent / 100;
                         const final = base * pct;
+                        const withheld = base - final;
+                        totalWithheld += withheld;
                         if (final !== 0) {
                             await usersRepo
                                 .createQueryBuilder()
@@ -93,6 +98,9 @@ let ProjectsService = class ProjectsService {
                                 .where('id = :id', { id: u.id })
                                 .execute();
                         }
+                    }
+                    if (totalWithheld > 0) {
+                        await this.partnerService.distributeCommissionWithManager(manager, totalWithheld);
                     }
                     await projRepo
                         .createQueryBuilder()
@@ -120,7 +128,7 @@ let ProjectsService = class ProjectsService {
             .addSelect('COALESCE(SUM(p.totalInvestment), 0)', 'totalInvestment')
             .addSelect('COALESCE(SUM(p.totalSell), 0)', 'totalSell')
             .addSelect('COALESCE(SUM(p.totalCost), 0)', 'totalCost')
-            .addSelect('COALESCE(SUM(CASE WHEN (p.totalCost - p.totalSell) > 0 THEN (p.totalCost - p.totalSell) ELSE 0 END), 0)', 'totalProfit')
+            .addSelect('COALESCE(SUM(CASE WHEN (p.totalSell - p.totalCost) > 0 THEN (p.totalSell - p.totalCost) ELSE 0 END), 0)', 'totalProfit')
             .getRawOne();
         const totalProjects = raw?.count != null ? Number(raw.count) : 0;
         const totalInvestment = raw?.totalInvestment != null ? Number(raw.totalInvestment) : 0;
@@ -199,8 +207,22 @@ let ProjectsService = class ProjectsService {
             }
             const totalDistributed = items.reduce((s, i) => s + i.final, 0);
             const totalWithheld = items.reduce((s, i) => s + i.withheld, 0);
+            if (totalWithheld > 0) {
+                await this.partnerService.distributeCommissionWithManager(manager, totalWithheld);
+            }
             return { pool, totalWithheld, totalDistributed, items };
         });
+    }
+    async onModuleInit() {
+        console.log('Recalculating all project profits...');
+        await this.projectsRepo
+            .createQueryBuilder()
+            .update(project_entity_1.Project)
+            .set({
+            totalProfit: () => 'CASE WHEN ("totalSell" - "totalCost") > 0 THEN ("totalSell" - "totalCost") ELSE 0 END',
+        })
+            .execute();
+        console.log('Profit recalculation complete.');
     }
 };
 exports.ProjectsService = ProjectsService;
@@ -211,6 +233,7 @@ exports.ProjectsService = ProjectsService = __decorate([
     __param(2, (0, typeorm_1.InjectRepository)(user_entity_1.UserEntity)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
         typeorm_2.Repository,
-        typeorm_2.Repository])
+        typeorm_2.Repository,
+        partner_service_1.PartnerService])
 ], ProjectsService);
 //# sourceMappingURL=projects.service.js.map

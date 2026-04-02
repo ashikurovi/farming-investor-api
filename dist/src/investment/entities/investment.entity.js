@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Investment = void 0;
 const typeorm_1 = require("typeorm");
 const user_entity_1 = require("../../users/entities/user.entity");
+const deed_entity_1 = require("../../deed/entities/deed.entity");
 let Investment = class Investment {
 };
 exports.Investment = Investment;
@@ -48,6 +49,22 @@ __decorate([
     (0, typeorm_1.Column)({ type: 'time', nullable: true }),
     __metadata("design:type", String)
 ], Investment.prototype, "time", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'date', nullable: true }),
+    __metadata("design:type", String)
+], Investment.prototype, "startDate", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'date', nullable: true }),
+    __metadata("design:type", String)
+], Investment.prototype, "endDate", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: true }),
+    __metadata("design:type", Boolean)
+], Investment.prototype, "isActive", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => deed_entity_1.Deed, (deed) => deed.investment),
+    __metadata("design:type", Array)
+], Investment.prototype, "deeds", void 0);
 exports.Investment = Investment = __decorate([
     (0, typeorm_1.Entity)('tbl_investments')
 ], Investment);

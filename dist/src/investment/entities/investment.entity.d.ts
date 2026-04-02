@@ -1,4 +1,5 @@
 import { UserEntity } from '../../users/entities/user.entity';
+import { Deed } from '../../deed/entities/deed.entity';
 export declare class Investment {
     id: number;
     investorId: number;
@@ -8,4 +9,8 @@ export declare class Investment {
     photoUrl?: string;
     date?: string;
     time?: string;
+    startDate?: string;
+    endDate?: string;
+    isActive: boolean;
+    deeds: Deed[];
 }

@@ -13,6 +13,7 @@ import { InvestorTypeEntity } from '../../investor-type/entities/investor-type.e
 export enum UserRole {
   ADMIN = 'admin',
   INVESTOR = 'investor',
+  PARTNER = 'partner',
 }
 
 @Entity('tbl_users')

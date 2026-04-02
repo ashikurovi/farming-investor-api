@@ -13,11 +13,14 @@ export type InvestorTypeResponse = {
   percentage: number;
 };
 
+import { PartnerService } from 'src/partner/partner.service';
+
 @Injectable()
 export class InvestorTypeService {
   constructor(
     @InjectRepository(InvestorTypeEntity)
     private readonly investorTypeRepo: Repository<InvestorTypeEntity>,
+    private readonly partnerService: PartnerService,
   ) {}
 
   async create(
@@ -81,7 +84,7 @@ export class InvestorTypeService {
         .createQueryBuilder()
         .update(UserEntity)
         .set({ totalProfit: 0 } as any)
-        .where('role = :role', { role: UserRole.INVESTOR })
+        .where('role IN (:...roles)', { roles: [UserRole.INVESTOR, UserRole.PARTNER] })
         .andWhere('isBanned = :banned', { banned: false })
         .execute();
 
@@ -90,6 +93,7 @@ export class InvestorTypeService {
         0,
       );
 
+      let totalWithheld = 0;
       if (pool > 0 && users.length > 0 && totalInvest > 0) {
         for (const u of users) {
           const share = Number(u.totalInvestment || 0) / totalInvest;
@@ -98,7 +102,10 @@ export class InvestorTypeService {
               ? Number(u.investorType.percentage)
               : 100;
           const pct = investorTypePercent / 100;
-          const final = pool * share * pct;
+          const base = pool * share;
+          const final = base * pct;
+          const withheld = base - final;
+          totalWithheld += withheld;
           if (final !== 0) {
             await usersRepo
               .createQueryBuilder()
@@ -110,6 +117,13 @@ export class InvestorTypeService {
               .execute();
           }
         }
+      }
+
+      if (totalWithheld > 0) {
+        await this.partnerService.distributeCommissionWithManager(
+          manager,
+          totalWithheld,
+        );
       }
     });
 
