@@ -52,6 +52,7 @@ const typeorm_2 = require("typeorm");
 const bcrypt = __importStar(require("bcrypt"));
 const user_entity_1 = require("../users/entities/user.entity");
 const investment_entity_1 = require("../investment/entities/investment.entity");
+const partner_payout_entity_1 = require("./entities/partner-payout.entity");
 let PartnerService = class PartnerService {
     constructor(usersRepository, investmentRepository) {
         this.usersRepository = usersRepository;
@@ -85,7 +86,16 @@ let PartnerService = class PartnerService {
         if (!user) {
             throw new common_1.NotFoundException(`Partner with id "${id}" not found`);
         }
-        return user;
+        const { sum } = await this.usersRepository
+            .createQueryBuilder('user')
+            .select('SUM(user.totalInvestment)', 'sum')
+            .where('user.role = :role', { role: user_entity_1.UserRole.PARTNER })
+            .getRawOne();
+        const totalPartnerInvestment = Number(sum) || 0;
+        const sharePercentage = totalPartnerInvestment > 0 && Number(user.totalInvestment) > 0
+            ? ((Number(user.totalInvestment) / totalPartnerInvestment) * 100).toFixed(2)
+            : '0.00';
+        return { ...user, sharePercentage, totalPartnerInvestment };
     }
     async invest(partnerId, dto) {
         const partner = await this.findOne(partnerId);
@@ -152,11 +162,31 @@ let PartnerService = class PartnerService {
                 throw new common_1.BadRequestException('Insufficient profit balance');
             }
             await manager.getRepository(user_entity_1.UserEntity).decrement({ id: partnerId }, 'totalProfit', amountToWithdraw);
+            const reference = `PYT-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+            const payout = manager.getRepository(partner_payout_entity_1.PartnerPayout).create({
+                partnerId,
+                amount: amountToWithdraw,
+                reference,
+            });
+            await manager.getRepository(partner_payout_entity_1.PartnerPayout).save(payout);
             return {
                 success: true,
                 withdrawn: amountToWithdraw,
                 remainingProfit: currentProfit - amountToWithdraw,
+                reference,
             };
+        });
+    }
+    async getPayouts(partnerId) {
+        return this.usersRepository.manager.getRepository(partner_payout_entity_1.PartnerPayout).find({
+            where: { partnerId },
+            order: { createdAt: 'DESC' },
+        });
+    }
+    async getAllPayouts() {
+        return this.usersRepository.manager.getRepository(partner_payout_entity_1.PartnerPayout).find({
+            relations: ['partner'],
+            order: { createdAt: 'DESC' },
         });
     }
     async distributeCommissionWithManager(manager, commissionAmount) {

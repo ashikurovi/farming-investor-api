@@ -107,12 +107,12 @@ let DailyReportService = class DailyReportService {
                     for (const u of users) {
                         const share = Number(u.totalInvestment || 0) / totalInvest;
                         const base = delta * share;
-                        const investorTypePercent = u.investorType && u.investorType.percentage != null
+                        const deductionPercent = u.investorType && u.investorType.percentage != null
                             ? Number(u.investorType.percentage)
-                            : 100;
-                        const pct = investorTypePercent / 100;
-                        const final = base * pct;
-                        const withheld = base - final;
+                            : 0;
+                        const deductionFraction = deductionPercent / 100;
+                        const withheld = base * deductionFraction;
+                        const final = base - withheld;
                         totalWithheld += withheld;
                         if (final !== 0) {
                             await this.usersRepo

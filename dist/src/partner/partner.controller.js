@@ -33,6 +33,9 @@ let PartnerController = class PartnerController {
     findAll() {
         return this.partnerService.findAll();
     }
+    getAllPayouts() {
+        return this.partnerService.getAllPayouts();
+    }
     findOne(id) {
         return this.partnerService.findOne(+id);
     }
@@ -44,6 +47,9 @@ let PartnerController = class PartnerController {
     }
     withdrawProfit(id, dto) {
         return this.partnerService.withdrawProfit(+id, dto);
+    }
+    getPayouts(id) {
+        return this.partnerService.getPayouts(+id);
     }
 };
 exports.PartnerController = PartnerController;
@@ -64,6 +70,14 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], PartnerController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)('payouts'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)(user_entity_1.UserRole.ADMIN),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], PartnerController.prototype, "getAllPayouts", null);
 __decorate([
     (0, common_1.Get)(':id'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
@@ -101,6 +115,15 @@ __decorate([
     __metadata("design:paramtypes", [String, withdraw_profit_dto_1.WithdrawProfitDto]),
     __metadata("design:returntype", void 0)
 ], PartnerController.prototype, "withdrawProfit", null);
+__decorate([
+    (0, common_1.Get)(':id/payouts'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)(user_entity_1.UserRole.ADMIN, user_entity_1.UserRole.PARTNER),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], PartnerController.prototype, "getPayouts", null);
 exports.PartnerController = PartnerController = __decorate([
     (0, common_1.Controller)('partner'),
     __metadata("design:paramtypes", [partner_service_1.PartnerService])

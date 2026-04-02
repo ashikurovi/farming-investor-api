@@ -8,7 +8,8 @@ export declare class PartnerController {
     constructor(partnerService: PartnerService);
     create(createPartnerDto: CreatePartnerDto): Promise<import("../users/entities/user.entity").UserEntity>;
     findAll(): Promise<import("../users/entities/user.entity").UserEntity[]>;
-    findOne(id: string): Promise<import("../users/entities/user.entity").UserEntity>;
+    getAllPayouts(): Promise<import("./entities/partner-payout.entity").PartnerPayout[]>;
+    findOne(id: string): Promise<any>;
     invest(id: string, dto: PartnerInvestDto): Promise<import("../investment/entities/investment.entity").Investment>;
     distributeCommission(dto: DistributeCommissionDto): Promise<{
         success: boolean;
@@ -20,5 +21,7 @@ export declare class PartnerController {
         success: boolean;
         withdrawn: number;
         remainingProfit: number;
+        reference: string;
     }>;
+    getPayouts(id: string): Promise<import("./entities/partner-payout.entity").PartnerPayout[]>;
 }

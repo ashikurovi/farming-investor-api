@@ -13,12 +13,13 @@ const partner_service_1 = require("./partner.service");
 const partner_controller_1 = require("./partner.controller");
 const user_entity_1 = require("../users/entities/user.entity");
 const investment_entity_1 = require("../investment/entities/investment.entity");
+const partner_payout_entity_1 = require("./entities/partner-payout.entity");
 let PartnerModule = class PartnerModule {
 };
 exports.PartnerModule = PartnerModule;
 exports.PartnerModule = PartnerModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([user_entity_1.UserEntity, investment_entity_1.Investment])],
+        imports: [typeorm_1.TypeOrmModule.forFeature([user_entity_1.UserEntity, investment_entity_1.Investment, partner_payout_entity_1.PartnerPayout])],
         controllers: [partner_controller_1.PartnerController],
         providers: [partner_service_1.PartnerService],
         exports: [partner_service_1.PartnerService],

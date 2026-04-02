@@ -93,13 +93,13 @@ export class ProjectsService implements OnModuleInit {
           for (const u of users) {
             const share = Number(u.totalInvestment || 0) / totalInvest;
             const base = delta * share;
-            const investorTypePercent =
+            const deductionPercent =
               u.investorType && u.investorType.percentage != null
                 ? Number(u.investorType.percentage)
-                : 100;
-            const pct = investorTypePercent / 100;
-            const final = base * pct;
-            const withheld = base - final;
+                : 0;
+            const deductionFraction = deductionPercent / 100;
+            const withheld = base * deductionFraction;
+            const final = base - withheld;
             totalWithheld += withheld;
             if (final !== 0) {
               await usersRepo
@@ -246,13 +246,13 @@ export class ProjectsService implements OnModuleInit {
       for (const u of users) {
         const share = Number(u.totalInvestment || 0) / totalInvest;
         const base = pool * share;
-        const investorTypePercent =
+        const deductionPercent =
           u.investorType && u.investorType.percentage != null
             ? Number(u.investorType.percentage)
-            : 100;
-        const pct = investorTypePercent / 100;
-        const final = base * pct;
-        const withheld = base - final;
+            : 0;
+        const deductionFraction = deductionPercent / 100;
+        const withheld = base * deductionFraction;
+        const final = base - withheld;
         if (final !== 0) {
           await usersRepo
             .createQueryBuilder()
@@ -267,7 +267,7 @@ export class ProjectsService implements OnModuleInit {
           userId: u.id,
           share,
           base,
-          investorTypePercent,
+          investorTypePercent: deductionPercent,
           final,
           withheld,
         });
