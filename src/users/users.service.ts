@@ -17,6 +17,7 @@ import { UserEntity } from './entities/user.entity';
 import { InvestorTypeEntity } from '../investor-type/entities/investor-type.entity';
 import { Investment } from '../investment/entities/investment.entity';
 import { PartnerService } from '../partner/partner.service';
+import { InvestorPayout } from './entities/investor-payout.entity';
 
 @Injectable()
 export class UsersService {
@@ -357,6 +358,58 @@ export class UsersService {
         .where('id = :id', { id: userId })
         .execute();
       return { userId, withdrawnProfit, withdrawnInvestment };
+    });
+  }
+
+  async payout(userId: number): Promise<InvestorPayout> {
+    return this.usersRepository.manager.transaction(async (manager) => {
+      const userRepo = manager.getRepository(UserEntity);
+      const user = await userRepo.findOne({ where: { id: userId } });
+      if (!user) {
+        throw new NotFoundException(`User with id "${userId}" not found`);
+      }
+
+      const totalInvestment = Number(user.totalInvestment || 0);
+      const totalCost = Number(user.totalCost || 0);
+      const totalProfit = Number(user.totalProfit || 0);
+      const amount = totalInvestment + totalProfit; // Default combined amount if needed
+
+      if (totalInvestment === 0 && totalCost === 0 && totalProfit === 0) {
+        throw new BadRequestException('All selected balances are already zero');
+      }
+
+      // Decrement the balances to zero, keeping withdrawn items logic intact
+      await userRepo
+        .createQueryBuilder()
+        .update(UserEntity)
+        .set({
+          totalProfit: 0,
+          totalInvestment: 0,
+          totalCost: 0,
+          withdrawnProfit: () => `"withdrawnProfit" + ${totalProfit}`,
+        } as any)
+        .where('id = :id', { id: userId })
+        .execute();
+
+      const reference = `INV-PYT-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+
+      const payout = manager.getRepository(InvestorPayout).create({
+        investorId: userId,
+        amount,
+        totalInvestment,
+        totalCost,
+        totalProfit,
+        reference,
+      });
+
+      return manager.getRepository(InvestorPayout).save(payout);
+    });
+  }
+
+  async getPayouts(userId: number): Promise<InvestorPayout[]> {
+    return this.usersRepository.manager.getRepository(InvestorPayout).find({
+      where: { investorId: userId },
+      order: { createdAt: 'DESC' },
     });
   }
 }

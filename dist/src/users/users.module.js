@@ -15,13 +15,14 @@ const user_entity_1 = require("./entities/user.entity");
 const investor_type_entity_1 = require("../investor-type/entities/investor-type.entity");
 const investment_entity_1 = require("../investment/entities/investment.entity");
 const partner_module_1 = require("../partner/partner.module");
+const investor_payout_entity_1 = require("./entities/investor-payout.entity");
 let UsersModule = class UsersModule {
 };
 exports.UsersModule = UsersModule;
 exports.UsersModule = UsersModule = __decorate([
     (0, common_1.Module)({
         imports: [
-            typeorm_1.TypeOrmModule.forFeature([user_entity_1.UserEntity, investor_type_entity_1.InvestorTypeEntity, investment_entity_1.Investment]),
+            typeorm_1.TypeOrmModule.forFeature([user_entity_1.UserEntity, investor_type_entity_1.InvestorTypeEntity, investment_entity_1.Investment, investor_payout_entity_1.InvestorPayout]),
             partner_module_1.PartnerModule,
         ],
         controllers: [users_controller_1.UsersController],

@@ -180,6 +180,24 @@ let UsersController = class UsersController {
             data,
         };
     }
+    async payout(id) {
+        const numericId = Number(id);
+        const data = await this.usersService.payout(numericId);
+        return {
+            statusCode: common_1.HttpStatus.OK,
+            message: 'Investor payout successful',
+            data,
+        };
+    }
+    async getPayouts(id) {
+        const numericId = Number(id);
+        const data = await this.usersService.getPayouts(numericId);
+        return {
+            statusCode: common_1.HttpStatus.OK,
+            message: 'Investor payouts fetched successfully',
+            data,
+        };
+    }
 };
 exports.UsersController = UsersController;
 __decorate([
@@ -297,6 +315,20 @@ __decorate([
     __metadata("design:paramtypes", [String, Object, Object]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "investments", null);
+__decorate([
+    (0, common_1.Post)(':id/payout'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "payout", null);
+__decorate([
+    (0, common_1.Get)(':id/payouts'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "getPayouts", null);
 exports.UsersController = UsersController = __decorate([
     (0, common_1.Controller)('users'),
     __metadata("design:paramtypes", [users_service_1.UsersService,

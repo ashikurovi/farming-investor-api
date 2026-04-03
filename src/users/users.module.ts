@@ -7,10 +7,11 @@ import { UserEntity } from './entities/user.entity';
 import { InvestorTypeEntity } from '../investor-type/entities/investor-type.entity';
 import { Investment } from '../investment/entities/investment.entity';
 import { PartnerModule } from '../partner/partner.module';
+import { InvestorPayout } from './entities/investor-payout.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([UserEntity, InvestorTypeEntity, Investment]),
+    TypeOrmModule.forFeature([UserEntity, InvestorTypeEntity, Investment, InvestorPayout]),
     PartnerModule,
   ],
   controllers: [UsersController],

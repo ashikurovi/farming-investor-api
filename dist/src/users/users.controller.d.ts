@@ -117,4 +117,14 @@ export declare class UsersController {
             };
         };
     }>;
+    payout(id: string): Promise<{
+        statusCode: HttpStatus;
+        message: string;
+        data: import("./entities/investor-payout.entity").InvestorPayout;
+    }>;
+    getPayouts(id: string): Promise<{
+        statusCode: HttpStatus;
+        message: string;
+        data: import("./entities/investor-payout.entity").InvestorPayout[];
+    }>;
 }

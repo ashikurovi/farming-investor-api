@@ -9,6 +9,7 @@ import { UserEntity } from './entities/user.entity';
 import { InvestorTypeEntity } from '../investor-type/entities/investor-type.entity';
 import { Investment } from '../investment/entities/investment.entity';
 import { PartnerService } from '../partner/partner.service';
+import { InvestorPayout } from './entities/investor-payout.entity';
 export declare class UsersService {
     private readonly usersRepository;
     private readonly investorTypeRepository;
@@ -70,4 +71,6 @@ export declare class UsersService {
         withdrawnProfit: number;
         withdrawnInvestment: number;
     }>;
+    payout(userId: number): Promise<InvestorPayout>;
+    getPayouts(userId: number): Promise<InvestorPayout[]>;
 }

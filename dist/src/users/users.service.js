@@ -55,6 +55,7 @@ const user_entity_1 = require("./entities/user.entity");
 const investor_type_entity_1 = require("../investor-type/entities/investor-type.entity");
 const investment_entity_1 = require("../investment/entities/investment.entity");
 const partner_service_1 = require("../partner/partner.service");
+const investor_payout_entity_1 = require("./entities/investor-payout.entity");
 let UsersService = class UsersService {
     constructor(usersRepository, investorTypeRepository, investmentRepository, jwtService, partnerService) {
         this.usersRepository = usersRepository;
@@ -309,6 +310,49 @@ let UsersService = class UsersService {
                 .where('id = :id', { id: userId })
                 .execute();
             return { userId, withdrawnProfit, withdrawnInvestment };
+        });
+    }
+    async payout(userId) {
+        return this.usersRepository.manager.transaction(async (manager) => {
+            const userRepo = manager.getRepository(user_entity_1.UserEntity);
+            const user = await userRepo.findOne({ where: { id: userId } });
+            if (!user) {
+                throw new common_1.NotFoundException(`User with id "${userId}" not found`);
+            }
+            const totalInvestment = Number(user.totalInvestment || 0);
+            const totalCost = Number(user.totalCost || 0);
+            const totalProfit = Number(user.totalProfit || 0);
+            const amount = totalInvestment + totalProfit;
+            if (totalInvestment === 0 && totalCost === 0 && totalProfit === 0) {
+                throw new common_1.BadRequestException('All selected balances are already zero');
+            }
+            await userRepo
+                .createQueryBuilder()
+                .update(user_entity_1.UserEntity)
+                .set({
+                totalProfit: 0,
+                totalInvestment: 0,
+                totalCost: 0,
+                withdrawnProfit: () => `"withdrawnProfit" + ${totalProfit}`,
+            })
+                .where('id = :id', { id: userId })
+                .execute();
+            const reference = `INV-PYT-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+            const payout = manager.getRepository(investor_payout_entity_1.InvestorPayout).create({
+                investorId: userId,
+                amount,
+                totalInvestment,
+                totalCost,
+                totalProfit,
+                reference,
+            });
+            return manager.getRepository(investor_payout_entity_1.InvestorPayout).save(payout);
+        });
+    }
+    async getPayouts(userId) {
+        return this.usersRepository.manager.getRepository(investor_payout_entity_1.InvestorPayout).find({
+            where: { investorId: userId },
+            order: { createdAt: 'DESC' },
         });
     }
 };

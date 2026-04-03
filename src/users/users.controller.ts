@@ -243,4 +243,26 @@ export class UsersController {
       data,
     };
   }
+
+  @Post(':id/payout')
+  async payout(@Param('id') id: string) {
+    const numericId = Number(id);
+    const data = await this.usersService.payout(numericId);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Investor payout successful',
+      data,
+    };
+  }
+
+  @Get(':id/payouts')
+  async getPayouts(@Param('id') id: string) {
+    const numericId = Number(id);
+    const data = await this.usersService.getPayouts(numericId);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Investor payouts fetched successfully',
+      data,
+    };
+  }
 }
