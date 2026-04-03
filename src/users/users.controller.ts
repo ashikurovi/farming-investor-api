@@ -255,6 +255,16 @@ export class UsersController {
     };
   }
 
+  @Get('payouts/all')
+  async getAllPayouts() {
+    const data = await this.usersService.getAllPayouts();
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'All investor payouts fetched successfully',
+      data,
+    };
+  }
+
   @Get(':id/payouts')
   async getPayouts(@Param('id') id: string) {
     const numericId = Number(id);

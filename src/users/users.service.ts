@@ -412,4 +412,11 @@ export class UsersService {
       order: { createdAt: 'DESC' },
     });
   }
+
+  async getAllPayouts(): Promise<InvestorPayout[]> {
+    return this.usersRepository.manager.getRepository(InvestorPayout).find({
+      relations: ['investor'],
+      order: { createdAt: 'DESC' },
+    });
+  }
 }

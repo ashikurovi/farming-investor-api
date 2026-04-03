@@ -73,4 +73,5 @@ export declare class UsersService {
     }>;
     payout(userId: number): Promise<InvestorPayout>;
     getPayouts(userId: number): Promise<InvestorPayout[]>;
+    getAllPayouts(): Promise<InvestorPayout[]>;
 }

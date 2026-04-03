@@ -355,6 +355,12 @@ let UsersService = class UsersService {
             order: { createdAt: 'DESC' },
         });
     }
+    async getAllPayouts() {
+        return this.usersRepository.manager.getRepository(investor_payout_entity_1.InvestorPayout).find({
+            relations: ['investor'],
+            order: { createdAt: 'DESC' },
+        });
+    }
 };
 exports.UsersService = UsersService;
 exports.UsersService = UsersService = __decorate([

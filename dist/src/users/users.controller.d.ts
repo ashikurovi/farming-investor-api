@@ -122,6 +122,11 @@ export declare class UsersController {
         message: string;
         data: import("./entities/investor-payout.entity").InvestorPayout;
     }>;
+    getAllPayouts(): Promise<{
+        statusCode: HttpStatus;
+        message: string;
+        data: import("./entities/investor-payout.entity").InvestorPayout[];
+    }>;
     getPayouts(id: string): Promise<{
         statusCode: HttpStatus;
         message: string;

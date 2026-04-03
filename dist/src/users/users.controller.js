@@ -189,6 +189,14 @@ let UsersController = class UsersController {
             data,
         };
     }
+    async getAllPayouts() {
+        const data = await this.usersService.getAllPayouts();
+        return {
+            statusCode: common_1.HttpStatus.OK,
+            message: 'All investor payouts fetched successfully',
+            data,
+        };
+    }
     async getPayouts(id) {
         const numericId = Number(id);
         const data = await this.usersService.getPayouts(numericId);
@@ -322,6 +330,12 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "payout", null);
+__decorate([
+    (0, common_1.Get)('payouts/all'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "getAllPayouts", null);
 __decorate([
     (0, common_1.Get)(':id/payouts'),
     __param(0, (0, common_1.Param)('id')),
