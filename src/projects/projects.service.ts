@@ -146,6 +146,8 @@ export class ProjectsService implements OnModuleInit {
     totalProfit: number;
     activeInvestors: number;
     avgYieldPercent: number;
+    investorTotalInvestment: number;
+    partnerTotalInvestment: number;
     moduleCounts?: Record<string, number>;
   }> {
     const raw = await this.projectsRepo
@@ -179,6 +181,21 @@ export class ProjectsService implements OnModuleInit {
     const profitTraditional = totalSell - totalCost;
     const avgYieldPercent =
       totalInvestment > 0 ? (profitTraditional / totalInvestment) * 100 : 0;
+
+    const userInvestments = await this.usersRepo
+      .createQueryBuilder('u')
+      .select('u.role', 'role')
+      .addSelect('COALESCE(SUM(u."totalInvestment"), 0)', 'totalInvestment')
+      .groupBy('u.role')
+      .getRawMany<{ role: string; totalInvestment: string | number }>();
+
+    let investorTotalInvestment = 0;
+    let partnerTotalInvestment = 0;
+
+    userInvestments.forEach(item => {
+      if (item.role === 'investor') investorTotalInvestment = Number(item.totalInvestment);
+      if (item.role === 'partner') partnerTotalInvestment = Number(item.totalInvestment);
+    });
 
     const countsRaw = await this.projectsRepo.manager.query(`
       SELECT 
@@ -217,6 +234,8 @@ export class ProjectsService implements OnModuleInit {
       totalProfit,
       activeInvestors,
       avgYieldPercent,
+      investorTotalInvestment,
+      partnerTotalInvestment,
       moduleCounts,
     };
   }

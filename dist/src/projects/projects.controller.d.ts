@@ -28,6 +28,9 @@ export declare class ProjectsController {
             totalProfit: number;
             activeInvestors: number;
             avgYieldPercent: number;
+            investorTotalInvestment: number;
+            partnerTotalInvestment: number;
+            moduleCounts?: Record<string, number>;
         };
     }>;
     findOne(id: string): Promise<{

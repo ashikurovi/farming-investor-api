@@ -140,6 +140,47 @@ let ProjectsService = class ProjectsService {
         });
         const profitTraditional = totalSell - totalCost;
         const avgYieldPercent = totalInvestment > 0 ? (profitTraditional / totalInvestment) * 100 : 0;
+        const userInvestments = await this.usersRepo
+            .createQueryBuilder('u')
+            .select('u.role', 'role')
+            .addSelect('COALESCE(SUM(u."totalInvestment"), 0)', 'totalInvestment')
+            .groupBy('u.role')
+            .getRawMany();
+        let investorTotalInvestment = 0;
+        let partnerTotalInvestment = 0;
+        userInvestments.forEach(item => {
+            if (item.role === 'investor')
+                investorTotalInvestment = Number(item.totalInvestment);
+            if (item.role === 'partner')
+                partnerTotalInvestment = Number(item.totalInvestment);
+        });
+        const countsRaw = await this.projectsRepo.manager.query(`
+      SELECT 
+        (SELECT COUNT(*) FROM "tbl_users") as users,
+        (SELECT COUNT(*) FROM "tbl_investments") as investments,
+        (SELECT COUNT(*) FROM "tbl_deeds") as deeds,
+        (SELECT COUNT(*) FROM "tbl_notices") as notices,
+        (SELECT COUNT(*) FROM "tbl_banners") as banners,
+        (SELECT COUNT(*) FROM "tbl_glarry") as glarry,
+        (SELECT COUNT(*) FROM "tbl_contact_message") as contacts,
+        (SELECT COUNT(*) FROM "tbl_daily_reports") as reports,
+        (SELECT COUNT(*) FROM "partner_payouts") as partnerpayouts,
+        (SELECT COUNT(*) FROM "tbl_investor_types") as investortypes,
+        (SELECT COUNT(*) FROM "tbl_investamounts") as investamounts
+    `);
+        const moduleCounts = countsRaw && countsRaw[0] ? {
+            users: Number(countsRaw[0].users || 0),
+            investments: Number(countsRaw[0].investments || 0),
+            deeds: Number(countsRaw[0].deeds || 0),
+            notices: Number(countsRaw[0].notices || 0),
+            banners: Number(countsRaw[0].banners || 0),
+            glarry: Number(countsRaw[0].glarry || 0),
+            contacts: Number(countsRaw[0].contacts || 0),
+            reports: Number(countsRaw[0].reports || 0),
+            partnerPayouts: Number(countsRaw[0].partnerpayouts || 0),
+            investorTypes: Number(countsRaw[0].investortypes || 0),
+            investAmounts: Number(countsRaw[0].investamounts || 0),
+        } : {};
         return {
             totalProjects,
             totalInvestment,
@@ -148,6 +189,9 @@ let ProjectsService = class ProjectsService {
             totalProfit,
             activeInvestors,
             avgYieldPercent,
+            investorTotalInvestment,
+            partnerTotalInvestment,
+            moduleCounts,
         };
     }
     async distributeAllProfit(dto) {

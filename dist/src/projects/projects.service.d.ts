@@ -26,6 +26,9 @@ export declare class ProjectsService implements OnModuleInit {
         totalProfit: number;
         activeInvestors: number;
         avgYieldPercent: number;
+        investorTotalInvestment: number;
+        partnerTotalInvestment: number;
+        moduleCounts?: Record<string, number>;
     }>;
     distributeAllProfit(dto: DistributeProfitDto): Promise<{
         pool: number;
