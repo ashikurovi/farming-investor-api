@@ -22,10 +22,14 @@ export class DeedService {
     
     const queryBuilder = this.deedRepository.createQueryBuilder('deed')
       .leftJoinAndSelect('deed.investment', 'investment')
+      .leftJoinAndSelect('investment.investor', 'investor')
       .orderBy('deed.createdAt', 'DESC');
 
     if (search) {
-      queryBuilder.where('deed.title ILIKE :search', { search: `%${search}%` });
+      queryBuilder.where(
+        'deed.title ILIKE :search OR investor.name ILIKE :search OR investor.email ILIKE :search',
+        { search: `%${search}%` },
+      );
     }
 
     const [data, total] = await queryBuilder
