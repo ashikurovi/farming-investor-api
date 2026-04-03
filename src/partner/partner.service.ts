@@ -81,17 +81,41 @@ export class PartnerService {
 
       const savedInvestment = await manager.getRepository(Investment).save(investment);
 
-      await manager.getRepository(UserEntity).increment(
-        { id: partnerId },
-        'totalInvestment',
-        dto.amount,
-      );
+      // Fetch all partners to recalculate distribution
+      const partners = await manager.getRepository(UserEntity).find({
+        where: { role: UserRole.PARTNER },
+      });
 
-      await manager.getRepository(UserEntity).increment(
-        { id: partnerId },
-        'balance',
-        dto.amount,
-      );
+      let totalPartnerInvestment = 0;
+      let totalSystemProfit = 0;
+
+      // Update the investing partner locally for calculation
+      for (const p of partners) {
+        if (p.id === Number(partnerId)) {
+          p.totalInvestment = Number(p.totalInvestment) + Number(dto.amount);
+          p.balance = Number(p.balance) + Number(dto.amount);
+        } else {
+          p.totalInvestment = Number(p.totalInvestment);
+          p.balance = Number(p.balance);
+        }
+        totalPartnerInvestment += p.totalInvestment;
+        totalSystemProfit += Number(p.totalProfit);
+      }
+
+      // Update every partner including the one who invested, redistributing profit
+      for (const p of partners) {
+        const share = totalPartnerInvestment > 0 ? (p.totalInvestment / totalPartnerInvestment) : 0;
+        const newTotalProfit = totalSystemProfit * share;
+
+        await manager.getRepository(UserEntity).update(
+          { id: p.id },
+          { 
+            totalInvestment: p.totalInvestment,
+            balance: p.balance,
+            totalProfit: newTotalProfit
+          }
+        );
+      }
 
       return savedInvestment;
     });
