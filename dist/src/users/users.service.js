@@ -333,6 +333,7 @@ let UsersService = class UsersService {
                 totalProfit: 0,
                 totalInvestment: 0,
                 totalCost: 0,
+                balance: 0,
                 withdrawnProfit: () => `"withdrawnProfit" + ${totalProfit}`,
             })
                 .where('id = :id', { id: userId })

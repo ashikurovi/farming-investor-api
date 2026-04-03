@@ -386,6 +386,7 @@ export class UsersService {
           totalProfit: 0,
           totalInvestment: 0,
           totalCost: 0,
+          balance: 0,
           withdrawnProfit: () => `"withdrawnProfit" + ${totalProfit}`,
         } as any)
         .where('id = :id', { id: userId })
