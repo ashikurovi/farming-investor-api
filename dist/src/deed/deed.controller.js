@@ -16,6 +16,7 @@ exports.DeedController = void 0;
 const common_1 = require("@nestjs/common");
 const platform_express_1 = require("@nestjs/platform-express");
 const deed_service_1 = require("./deed.service");
+const jwt_auth_guard_1 = require("../common/guards/jwt-auth.guard");
 const create_deed_dto_1 = require("./dto/create-deed.dto");
 const update_deed_dto_1 = require("./dto/update-deed.dto");
 const blob_storage_service_1 = require("../uploads/blob-storage.service");
@@ -148,6 +149,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], DeedController.prototype, "remove", null);
 exports.DeedController = DeedController = __decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Controller)('deed'),
     __metadata("design:paramtypes", [deed_service_1.DeedService,
         blob_storage_service_1.BlobStorageService])

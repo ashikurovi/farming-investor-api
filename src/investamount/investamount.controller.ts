@@ -1,7 +1,9 @@
-import { Controller, Get, Body, Patch } from '@nestjs/common';
+import { Controller, Get, Body, Patch, UseGuards } from '@nestjs/common';
 import { InvestamountService } from './investamount.service';
 import { UpdateInvestamountDto } from './dto/update-investamount.dto';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller('investamount')
 export class InvestamountController {
   constructor(private readonly investamountService: InvestamountService) {}

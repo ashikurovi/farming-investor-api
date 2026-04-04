@@ -16,6 +16,7 @@ exports.DailyReportController = void 0;
 const common_1 = require("@nestjs/common");
 const platform_express_1 = require("@nestjs/platform-express");
 const daily_report_service_1 = require("./daily-report.service");
+const jwt_auth_guard_1 = require("../common/guards/jwt-auth.guard");
 const create_daily_report_dto_1 = require("./dto/create-daily-report.dto");
 const update_daily_report_dto_1 = require("./dto/update-daily-report.dto");
 const blob_storage_service_1 = require("../uploads/blob-storage.service");
@@ -107,6 +108,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], DailyReportController.prototype, "remove", null);
 exports.DailyReportController = DailyReportController = __decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Controller)('daily-report'),
     __metadata("design:paramtypes", [daily_report_service_1.DailyReportService,
         blob_storage_service_1.BlobStorageService])

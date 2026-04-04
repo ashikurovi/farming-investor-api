@@ -16,6 +16,8 @@ exports.ProjectsController = void 0;
 const common_1 = require("@nestjs/common");
 const platform_express_1 = require("@nestjs/platform-express");
 const projects_service_1 = require("./projects.service");
+const jwt_auth_guard_1 = require("../common/guards/jwt-auth.guard");
+const public_decorator_1 = require("../common/decorators/public.decorator");
 const create_project_dto_1 = require("./dto/create-project.dto");
 const update_project_dto_1 = require("./dto/update-project.dto");
 const blob_storage_service_1 = require("../uploads/blob-storage.service");
@@ -95,18 +97,21 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], ProjectsController.prototype, "create", null);
 __decorate([
+    (0, public_decorator_1.Public)(),
     (0, common_1.Get)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], ProjectsController.prototype, "findAll", null);
 __decorate([
+    (0, public_decorator_1.Public)(),
     (0, common_1.Get)('stats'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], ProjectsController.prototype, "getStats", null);
 __decorate([
+    (0, public_decorator_1.Public)(),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id')),
@@ -132,6 +137,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], ProjectsController.prototype, "remove", null);
 exports.ProjectsController = ProjectsController = __decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Controller)('projects'),
     __metadata("design:paramtypes", [projects_service_1.ProjectsService,
         blob_storage_service_1.BlobStorageService])

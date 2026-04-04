@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.InvestorTypeController = void 0;
 const common_1 = require("@nestjs/common");
 const investor_type_service_1 = require("./investor-type.service");
+const jwt_auth_guard_1 = require("../common/guards/jwt-auth.guard");
 const create_investor_type_dto_1 = require("./dto/create-investor-type.dto");
 const update_investor_type_dto_1 = require("./dto/update-investor-type.dto");
 let InvestorTypeController = class InvestorTypeController {
@@ -99,6 +100,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], InvestorTypeController.prototype, "remove", null);
 exports.InvestorTypeController = InvestorTypeController = __decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Controller)('investor-types'),
     __metadata("design:paramtypes", [investor_type_service_1.InvestorTypeService])
 ], InvestorTypeController);

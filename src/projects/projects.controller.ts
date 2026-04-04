@@ -10,13 +10,17 @@ import {
   Post,
   UploadedFile,
   UseInterceptors,
+  UseGuards,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ProjectsService } from './projects.service';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { Public } from '../common/decorators/public.decorator';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { BlobStorageService } from '../uploads/blob-storage.service';
 
+@UseGuards(JwtAuthGuard)
 @Controller('projects')
 export class ProjectsController {
   constructor(
@@ -44,6 +48,7 @@ export class ProjectsController {
     };
   }
 
+  @Public()
   @Get()
   async findAll() {
     const data = await this.projectsService.findAll();
@@ -54,6 +59,7 @@ export class ProjectsController {
     };
   }
 
+  @Public()
   @Get('stats')
   async getStats() {
     const data = await this.projectsService.getStats();
@@ -64,6 +70,7 @@ export class ProjectsController {
     };
   }
 
+  @Public()
   @HttpCode(HttpStatus.OK)
   @Get(':id')
   async findOne(@Param('id') id: string) {

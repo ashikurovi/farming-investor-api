@@ -16,6 +16,7 @@ exports.InvestamountController = void 0;
 const common_1 = require("@nestjs/common");
 const investamount_service_1 = require("./investamount.service");
 const update_investamount_dto_1 = require("./dto/update-investamount.dto");
+const jwt_auth_guard_1 = require("../common/guards/jwt-auth.guard");
 let InvestamountController = class InvestamountController {
     constructor(investamountService) {
         this.investamountService = investamountService;
@@ -42,6 +43,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], InvestamountController.prototype, "update", null);
 exports.InvestamountController = InvestamountController = __decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Controller)('investamount'),
     __metadata("design:paramtypes", [investamount_service_1.InvestamountService])
 ], InvestamountController);

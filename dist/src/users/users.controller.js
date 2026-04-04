@@ -16,6 +16,8 @@ exports.UsersController = void 0;
 const common_1 = require("@nestjs/common");
 const platform_express_1 = require("@nestjs/platform-express");
 const users_service_1 = require("./users.service");
+const jwt_auth_guard_1 = require("../common/guards/jwt-auth.guard");
+const public_decorator_1 = require("../common/decorators/public.decorator");
 const create_user_dto_1 = require("./dto/create-user.dto");
 const update_user_dto_1 = require("./dto/update-user.dto");
 const login_user_dto_1 = require("./dto/login-user.dto");
@@ -209,6 +211,7 @@ let UsersController = class UsersController {
 };
 exports.UsersController = UsersController;
 __decorate([
+    (0, public_decorator_1.Public)(),
     (0, common_1.Post)(),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('photo')),
     __param(0, (0, common_1.UploadedFile)()),
@@ -227,6 +230,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "findAll", null);
 __decorate([
+    (0, public_decorator_1.Public)(),
     (0, common_1.Post)('login'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -255,6 +259,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], UsersController.prototype, "findOne", null);
 __decorate([
+    (0, public_decorator_1.Public)(),
     (0, common_1.Post)('forgot-password'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -262,6 +267,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "forgotPassword", null);
 __decorate([
+    (0, public_decorator_1.Public)(),
     (0, common_1.Post)('reset-password'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -344,6 +350,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "getPayouts", null);
 exports.UsersController = UsersController = __decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Controller)('users'),
     __metadata("design:paramtypes", [users_service_1.UsersService,
         jwt_1.JwtService,

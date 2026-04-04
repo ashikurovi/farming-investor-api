@@ -7,4 +7,5 @@ export declare class CreateProjectDto {
     totalSell?: number;
     totalProfit?: number;
     totalInvestment?: number;
+    status?: string;
 }

@@ -11,13 +11,16 @@ import {
   Query,
   UploadedFiles,
   UseInterceptors,
+  UseGuards,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { DeedService } from './deed.service';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CreateDeedDto } from './dto/create-deed.dto';
 import { UpdateDeedDto } from './dto/update-deed.dto';
 import { BlobStorageService } from '../uploads/blob-storage.service';
 
+@UseGuards(JwtAuthGuard)
 @Controller('deed')
 export class DeedController {
   constructor(

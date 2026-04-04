@@ -33,6 +33,10 @@ __decorate([
     __metadata("design:type", String)
 ], Project.prototype, "photoUrl", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ default: 'Active', nullable: true }),
+    __metadata("design:type", String)
+], Project.prototype, "status", void 0);
+__decorate([
     (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
 ], Project.prototype, "location", void 0);

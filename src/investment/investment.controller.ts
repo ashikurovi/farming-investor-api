@@ -22,6 +22,7 @@ import { UsersService } from '../users/users.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/user.decorator';
 
+@UseGuards(JwtAuthGuard)
 @Controller(['investment', 'investments'])
 export class InvestmentController {
   constructor(

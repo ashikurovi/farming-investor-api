@@ -13,9 +13,12 @@ import {
   UnauthorizedException,
   UploadedFile,
   UseInterceptors,
+  UseGuards,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UsersService } from './users.service';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { Public } from '../common/decorators/public.decorator';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
@@ -26,6 +29,7 @@ import { Request } from 'express';
 import * as Express from 'express';
 import { BlobStorageService } from '../uploads/blob-storage.service';
 
+@UseGuards(JwtAuthGuard)
 @Controller('users')
 export class UsersController {
   constructor(
@@ -34,6 +38,7 @@ export class UsersController {
     private readonly blobStorageService: BlobStorageService,
   ) {}
 
+  @Public()
   @Post()
   @UseInterceptors(FileInterceptor('photo'))
   async create(
@@ -75,6 +80,7 @@ export class UsersController {
     };
   }
 
+  @Public()
   @Post('login')
   async login(@Body() loginUserDto: LoginUserDto) {
     const result = await this.usersService.login(loginUserDto);
@@ -136,6 +142,7 @@ export class UsersController {
     }));
   }
 
+  @Public()
   @Post('forgot-password')
   async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
     await this.usersService.forgotPassword(forgotPasswordDto);
@@ -145,6 +152,7 @@ export class UsersController {
     };
   }
 
+  @Public()
   @Post('reset-password')
   async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
     await this.usersService.resetPassword(resetPasswordDto);

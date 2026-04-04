@@ -169,6 +169,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], InvestmentController.prototype, "remove", null);
 exports.InvestmentController = InvestmentController = __decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Controller)(['investment', 'investments']),
     __metadata("design:paramtypes", [investment_service_1.InvestmentService,
         users_service_1.UsersService,

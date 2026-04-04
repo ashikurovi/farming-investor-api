@@ -1,7 +1,5 @@
 import { Global, Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
-import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../common/guards/roles.guard';
 
 @Global()
 @Module({
@@ -11,7 +9,7 @@ import { RolesGuard } from '../common/guards/roles.guard';
       signOptions: { expiresIn: '7d' },
     }),
   ],
-  providers: [JwtAuthGuard, RolesGuard],
-  exports: [JwtModule, JwtAuthGuard, RolesGuard],
+  providers: [],
+  exports: [JwtModule],
 })
 export class AuthModule {}

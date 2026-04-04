@@ -5,6 +5,7 @@ export declare class Project {
     name: string;
     description?: string;
     photoUrl?: string;
+    status: string;
     location?: string;
     totalCost: number;
     totalSell: number;

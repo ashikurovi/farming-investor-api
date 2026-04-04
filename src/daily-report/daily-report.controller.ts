@@ -9,13 +9,16 @@ import {
   Post,
   UploadedFile,
   UseInterceptors,
+  UseGuards,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { DailyReportService } from './daily-report.service';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CreateDailyReportDto } from './dto/create-daily-report.dto';
 import { UpdateDailyReportDto } from './dto/update-daily-report.dto';
 import { BlobStorageService } from '../uploads/blob-storage.service';
 
+@UseGuards(JwtAuthGuard)
 @Controller('daily-report')
 export class DailyReportController {
   constructor(

@@ -8,11 +8,14 @@ import {
   Param,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { InvestorTypeService } from './investor-type.service';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CreateInvestorTypeDto } from './dto/create-investor-type.dto';
 import { UpdateInvestorTypeDto } from './dto/update-investor-type.dto';
 
+@UseGuards(JwtAuthGuard)
 @Controller('investor-types')
 export class InvestorTypeController {
   constructor(private readonly investorTypeService: InvestorTypeService) {}

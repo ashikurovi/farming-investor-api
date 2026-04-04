@@ -109,8 +109,32 @@ let PartnerService = class PartnerService {
                 isActive: true,
             });
             const savedInvestment = await manager.getRepository(investment_entity_1.Investment).save(investment);
-            await manager.getRepository(user_entity_1.UserEntity).increment({ id: partnerId }, 'totalInvestment', dto.amount);
-            await manager.getRepository(user_entity_1.UserEntity).increment({ id: partnerId }, 'balance', dto.amount);
+            const partners = await manager.getRepository(user_entity_1.UserEntity).find({
+                where: { role: user_entity_1.UserRole.PARTNER },
+            });
+            let totalPartnerInvestment = 0;
+            let totalSystemProfit = 0;
+            for (const p of partners) {
+                if (p.id === Number(partnerId)) {
+                    p.totalInvestment = Number(p.totalInvestment) + Number(dto.amount);
+                    p.balance = Number(p.balance) + Number(dto.amount);
+                }
+                else {
+                    p.totalInvestment = Number(p.totalInvestment);
+                    p.balance = Number(p.balance);
+                }
+                totalPartnerInvestment += p.totalInvestment;
+                totalSystemProfit += Number(p.totalProfit);
+            }
+            for (const p of partners) {
+                const share = totalPartnerInvestment > 0 ? (p.totalInvestment / totalPartnerInvestment) : 0;
+                const newTotalProfit = totalSystemProfit * share;
+                await manager.getRepository(user_entity_1.UserEntity).update({ id: p.id }, {
+                    totalInvestment: p.totalInvestment,
+                    balance: p.balance,
+                    totalProfit: newTotalProfit
+                });
+            }
             return savedInvestment;
         });
     }
