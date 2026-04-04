@@ -43,4 +43,8 @@ export class CreateProjectDto {
   @Type(() => Number)
   @IsNumber()
   totalInvestment?: number;
+
+  @IsOptional()
+  @IsString()
+  status?: string;
 }

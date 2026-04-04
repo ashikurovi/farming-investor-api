@@ -16,6 +16,9 @@ export class Project {
   @Column({ nullable: true })
   photoUrl?: string;
 
+  @Column({ default: 'Active', nullable: true })
+  status: string;
+
   @Column({ nullable: true })
   location?: string;
 
